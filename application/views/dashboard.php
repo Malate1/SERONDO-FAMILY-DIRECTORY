@@ -89,7 +89,7 @@ foreach ($members as $member)
                         <span class="block truncate text-sm font-bold text-slate-900"><?= html_escape(member_full_name($birthday)) ?></span>
                         <span class="mt-1 block text-xs text-slate-500"><?= $is_today ? 'Today' : html_escape($birthday_date) ?><?= $years_old !== NULL ? ' · ' . ($is_today ? 'turns ' : 'turning ') . $years_old : '' ?></span>
                     </span>
-                    <span class="shrink-0 rounded-full bg-sky-100 px-2 py-1 text-[11px] font-semibold text-sky-700"><?= html_escape(preg_replace('/\s*\(.*\)$/', '', $birthday->clan_name)) ?></span>
+                    <span class="max-w-[40%] shrink-0 rounded-2xl bg-sky-100 px-2 py-1 text-center text-[11px] font-semibold text-sky-700"><?= html_escape(preg_replace('/\s*\(.*\)$/', '', $birthday->clan_name)) ?></span>
                 </a>
             <?php endforeach; ?>
         </div>
@@ -193,22 +193,22 @@ foreach ($members as $member)
 </section>
 
 <!-- Generated family tree -->
-<div id="family-tree-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="family-tree-title">
-    <section class="flex max-h-[90vh] w-full max-w-7xl flex-col overflow-hidden rounded-3xl bg-white shadow-2xl">
-        <header class="flex items-center justify-between gap-4 border-b border-slate-200 px-5 py-4 sm:px-7">
-            <div>
+<dialog id="family-tree-modal" class="app-dialog" aria-labelledby="family-tree-title">
+    <section class="dialog-panel flex w-full max-w-7xl flex-col overflow-hidden rounded-3xl bg-white shadow-2xl">
+        <header class="flex shrink-0 items-start justify-between gap-3 border-b border-slate-200 px-4 py-4 sm:px-7">
+            <div class="min-w-0">
                 <h2 id="family-tree-title" class="text-xl font-bold text-slate-900">Family tree</h2>
-                <p class="mt-1 text-sm text-slate-500">Each card is connected to its recorded parent across generations.</p>
+                <p id="family-tree-help" class="mt-1 text-sm text-slate-500">Scroll across and down to explore the connected generations.</p>
             </div>
-            <button type="button" id="close-family-tree" aria-label="Close family tree" class="rounded-xl p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900">
+            <button type="button" id="close-family-tree" aria-label="Close family tree" class="shrink-0 rounded-xl p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900">
                 <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 6l12 12M18 6L6 18"/></svg>
             </button>
         </header>
-        <div class="overflow-auto bg-slate-50 p-4 sm:p-6">
+        <div tabindex="0" role="region" aria-label="Family tree chart" aria-describedby="family-tree-help" class="min-h-0 overflow-auto overscroll-contain bg-slate-50 p-4 sm:p-6">
             <div id="family-tree-chart" class="relative"></div>
         </div>
     </section>
-</div>
+</dialog>
 
 <!-- Relationship calculator -->
 <section aria-labelledby="relationship-title" class="mb-12 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
@@ -217,7 +217,7 @@ foreach ($members as $member)
         <h2 id="relationship-title" class="mt-1 text-2xl font-bold tracking-tight text-slate-900">How are we related?</h2>
         <p class="mt-2 text-sm text-slate-500">Choose two relatives to find their closest recorded common ancestor.</p>
     </div>
-    <form id="relationship-form" class="mt-6 grid grid-cols-1 items-end gap-4 md:grid-cols-[1fr_auto_1fr_auto]">
+    <form id="relationship-form" class="mt-6 grid grid-cols-1 items-end gap-4 lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)_auto]">
         <div>
             <label for="relative-one" class="mb-1.5 block text-sm font-semibold text-slate-700">First relative</label>
             <select id="relative-one" required class="block w-full rounded-xl border border-slate-300 bg-white px-3.5 py-3 text-sm text-slate-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-500/15">
@@ -227,7 +227,7 @@ foreach ($members as $member)
                 <?php endforeach; ?>
             </select>
         </div>
-        <span class="hidden pb-3 text-center text-sm font-semibold text-slate-400 md:block">and</span>
+        <span class="hidden pb-3 text-center text-sm font-semibold text-slate-400 lg:block">and</span>
         <div>
             <label for="relative-two" class="mb-1.5 block text-sm font-semibold text-slate-700">Second relative</label>
             <select id="relative-two" required class="block w-full rounded-xl border border-slate-300 bg-white px-3.5 py-3 text-sm text-slate-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-500/15">
@@ -245,9 +245,9 @@ foreach ($members as $member)
 <!-- Directory: filter + instant search across all branches -->
 <section aria-label="All members">
     <div class="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-        <div class="flex items-center gap-3">
+        <div class="flex flex-wrap items-center gap-3">
             <h2 class="text-xl font-bold tracking-tight">Find a relative</h2>
-            <span id="count" class="rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-600 shadow-sm ring-1 ring-slate-200"><?= $total ?> people</span>
+            <span id="count" class="shrink-0 rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-600 shadow-sm ring-1 ring-slate-200"><?= $total ?> people</span>
         </div>
         <div class="relative w-full lg:w-96">
             <svg class="pointer-events-none absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M17 10.5a6.5 6.5 0 11-13 0 6.5 6.5 0 0113 0z"/></svg>
@@ -473,7 +473,7 @@ foreach ($members as $member)
         }
         roots.forEach(position);
 
-        var width = Math.max(300, maxGeneration * 250 + 220);
+        var width = Math.max(300, (maxGeneration - 1) * 250 + 226);
         var height = Math.max(170, nextRow * 112 + 20);
         treeChart.textContent = '';
         treeChart.style.width = width + 'px';
@@ -524,26 +524,23 @@ foreach ($members as $member)
     }
 
     function hideTree() {
-        treeModal.classList.add('hidden');
-        treeModal.classList.remove('flex');
+        treeModal.close();
     }
+    treeModal.addEventListener('close', function () { document.body.classList.remove('dialog-open'); });
 
     Array.prototype.forEach.call(document.querySelectorAll('[data-generate-tree]'), function (button) {
         button.addEventListener('click', function () {
             var clanId = button.getAttribute('data-generate-tree');
             generateTree(clanId);
             treeTitle.textContent = button.getAttribute('data-clan-name') + ' family tree';
-            treeModal.classList.remove('hidden');
-            treeModal.classList.add('flex');
+            treeModal.showModal();
+            document.body.classList.add('dialog-open');
             closeTree.focus();
         });
     });
     closeTree.addEventListener('click', hideTree);
     treeModal.addEventListener('click', function (event) {
         if (event.target === treeModal) { hideTree(); }
-    });
-    document.addEventListener('keydown', function (event) {
-        if (event.key === 'Escape' && !treeModal.classList.contains('hidden')) { hideTree(); }
     });
 
     var search = document.getElementById('search');

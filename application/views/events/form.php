@@ -27,7 +27,7 @@ $event_value = function ($field, $format = NULL) use ($event) {
         <h1 class="text-2xl font-bold tracking-tight text-white"><?= html_escape($title) ?></h1>
         <p class="mt-2 text-sm text-white/85">Share a clan event or add it to the calendar for all clans.</p>
     </div>
-    <form method="post" action="<?= $event ? site_url('events/edit/' . $event->id) : site_url('events/create') ?>" class="space-y-5 p-6 sm:p-8">
+    <form method="post" action="<?= $event ? site_url('events/edit/' . $event->id) : site_url('events/create') ?>" class="space-y-5 p-5 sm:p-8">
         <?= csrf_field() ?>
         <?php if (validation_errors()): ?>
             <div class="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-800" role="alert">Please correct the highlighted fields and try again.</div>
@@ -85,7 +85,7 @@ $event_value = function ($field, $format = NULL) use ($event) {
         </div>
 
         <div class="flex flex-col-reverse gap-3 border-t border-slate-100 pt-5 sm:flex-row sm:justify-end">
-            <a href="<?= site_url('events') ?>" class="rounded-xl px-5 py-2.5 text-center text-sm font-semibold text-slate-600 ring-1 ring-slate-200 transition hover:bg-slate-50">Cancel</a>
+            <a href="<?= site_url('events') ?>" class="touch-target rounded-xl px-5 py-2.5 text-center text-sm font-semibold text-slate-600 ring-1 ring-slate-200 transition hover:bg-slate-50">Cancel</a>
             <button type="submit" class="rounded-xl px-6 py-2.5 text-sm font-semibold text-white shadow-lg transition hover:-translate-y-0.5 <?= $theme['button'] ?>"><?= $event ? 'Save event' : 'Create event' ?></button>
         </div>
     </form>

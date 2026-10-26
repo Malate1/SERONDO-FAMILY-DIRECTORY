@@ -33,7 +33,7 @@ $err_o = '<p class="mt-1.5 text-xs font-medium text-rose-600">';
             </p>
         </div>
 
-        <div class="p-6 sm:p-8">
+        <div class="p-5 sm:p-8">
             <?php if (validation_errors() || ! empty($upload_error)): ?>
                 <div class="mb-6 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-800" role="alert">
                     Please fix the highlighted fields and try again.
@@ -149,12 +149,12 @@ $err_o = '<p class="mt-1.5 text-xs font-medium text-rose-600">';
                 <!-- Photo -->
                 <div>
                     <span class="<?= $label ?>">Photo <span class="font-normal text-slate-400">(JPG or PNG, max 2&nbsp;MB)</span></span>
-                    <div class="flex items-center gap-4 rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50/60 p-4 transition hover:border-slate-400">
+                    <div class="flex flex-col items-center gap-4 rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50/60 p-4 transition hover:border-slate-400 sm:flex-row">
                         <div class="relative h-20 w-20 shrink-0 overflow-hidden rounded-full bg-gradient-to-br from-slate-200 to-slate-300 ring-4 ring-white shadow">
                             <img id="photo-preview" src="<?= $photo_url ? html_escape($photo_url) : '' ?>" alt="Photo preview" class="h-full w-full object-cover <?= $photo_url ? '' : 'hidden' ?>">
                             <svg id="photo-placeholder" class="absolute inset-0 m-auto h-8 w-8 text-slate-400 <?= $photo_url ? 'hidden' : '' ?>" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.8 7.2a3.8 3.8 0 11-7.6 0 3.8 3.8 0 017.6 0zM4.5 20.1a7.5 7.5 0 0115 0"/></svg>
                         </div>
-                        <div class="min-w-0 flex-1">
+                        <div class="w-full min-w-0 flex-1 text-center sm:text-left">
                             <label for="f-photo" class="inline-flex cursor-pointer items-center rounded-lg bg-white px-3.5 py-2 text-sm font-semibold shadow-sm ring-1 ring-slate-200 transition hover:bg-slate-50 <?= $t['text'] ?>">Choose image</label>
                             <input type="file" id="f-photo" name="photo" accept="image/jpeg,image/png" class="sr-only">
                             <p id="photo-filename" class="mt-1.5 truncate text-xs text-slate-500">No file selected</p>
@@ -171,7 +171,7 @@ $err_o = '<p class="mt-1.5 text-xs font-medium text-rose-600">';
                 </div>
 
                 <div class="flex flex-col-reverse gap-3 border-t border-slate-100 pt-5 sm:flex-row sm:justify-end">
-                    <a href="<?= site_url('clan_members/clan/' . $clan->id) ?>" class="rounded-xl px-5 py-2.5 text-center text-sm font-semibold text-slate-600 ring-1 ring-slate-200 transition hover:bg-slate-50">Cancel</a>
+                    <a href="<?= site_url('clan_members/clan/' . $clan->id) ?>" class="touch-target rounded-xl px-5 py-2.5 text-center text-sm font-semibold text-slate-600 ring-1 ring-slate-200 transition hover:bg-slate-50">Cancel</a>
                     <button type="submit" id="form-submit" class="rounded-xl px-6 py-2.5 text-sm font-semibold text-white shadow-lg transition hover:-translate-y-0.5 active:translate-y-0 <?= $t['button'] ?>">
                         <?= $member ? 'Save changes' : 'Add member' ?>
                     </button>

@@ -18,11 +18,11 @@ $this->load->view('layout/header', ['title' => isset($title) ? $title : 'In Memo
     <section aria-label="Family memorials" class="grid grid-cols-1 gap-5 md:grid-cols-2">
         <?php foreach ($memorials as $member): ?>
             <article id="memorial-<?= (int) $member->id ?>" class="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
-                <div class="flex items-center gap-4 border-b border-slate-100 p-5 sm:p-6">
+                <div class="flex flex-col items-start gap-4 border-b border-slate-100 p-5 min-[400px]:flex-row min-[400px]:items-center sm:p-6">
                     <?= member_avatar($member, 'h-20 w-20', 'text-2xl') ?>
                     <div class="min-w-0">
                         <p class="text-xs font-semibold uppercase tracking-wider text-slate-500"><?= html_escape($member->clan_name) ?></p>
-                        <h2 class="mt-1 truncate text-xl font-bold text-slate-900"><?= html_escape(member_full_name($member)) ?></h2>
+                        <h2 class="mt-1 text-xl font-bold text-slate-900"><?= html_escape(member_full_name($member)) ?></h2>
                         <?php if ($member->birth_date || $member->death_date): ?>
                             <p class="mt-1 text-sm text-slate-500">
                                 <?= $member->birth_date ? html_escape(date('M j, Y', strtotime($member->birth_date))) : 'Birth date unknown' ?>
@@ -40,7 +40,7 @@ $this->load->view('layout/header', ['title' => isset($title) ? $title : 'In Memo
                     <?php else: ?>
                         <p class="text-sm italic text-slate-500">Remembered with love by the family.</p>
                     <?php endif; ?>
-                    <a href="<?= site_url('clan_members/clan/' . $member->clan_id) ?>#m-<?= (int) $member->id ?>" class="mt-5 inline-flex items-center gap-1 text-sm font-semibold text-indigo-600 transition hover:text-indigo-700">
+                    <a href="<?= site_url('clan_members/clan/' . $member->clan_id) ?>#m-<?= (int) $member->id ?>" class="touch-target mt-5 inline-flex items-center gap-1 text-sm font-semibold text-indigo-600 transition hover:text-indigo-700">
                         View family branch
                         <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
                     </a>

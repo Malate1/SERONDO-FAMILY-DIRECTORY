@@ -15,7 +15,7 @@ foreach ($members as $m)
     }
 }
 
-$btn_edit = 'rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-200';
+$btn_edit = 'touch-target rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-200';
 
 /** One lineage-tree node card. */
 $node_card = function ($n) use ($can_manage, $t, $child_count, $spouses) {
@@ -23,7 +23,7 @@ $node_card = function ($n) use ($can_manage, $t, $child_count, $spouses) {
     $partners = isset($spouses[(int) $n->id]) ? $spouses[(int) $n->id] : [];
     $deceased = isset($n->is_deceased) && (int) $n->is_deceased === 1;
     $age  = $deceased ? NULL : member_age($n->birth_date);
-    $html  = '<div id="t-' . (int) $n->id . '" class="person flex items-center gap-3 rounded-2xl border bg-white p-3 shadow-sm transition ' . $t['border'] . '"'
+    $html  = '<div id="t-' . (int) $n->id . '" class="person lineage-person flex items-center gap-3 rounded-2xl border bg-white p-3 shadow-sm transition ' . $t['border'] . '"'
            . ' data-view="tree" data-gen="' . (int) $n->generation . '" data-name="' . html_escape(mb_strtolower(member_full_name($n))) . '">';
     if ($kids)
     {
@@ -34,14 +34,14 @@ $node_card = function ($n) use ($can_manage, $t, $child_count, $spouses) {
         $html .= '<span class="h-4 w-4 shrink-0"></span>';
     }
     $html .= member_avatar($n, 'h-11 w-11', 'text-sm')
-           . '<div class="min-w-0 flex-1"><p class="truncate text-sm font-bold text-slate-900">' . html_escape(member_full_name($n)) . '</p>'
+           . '<div class="min-w-0 flex-1"><p class="lineage-name truncate text-sm font-bold text-slate-900">' . html_escape(member_full_name($n)) . '</p>'
            . '<p class="truncate text-xs text-slate-500">' . html_escape(generation_label($n->generation))
            . ($n->birth_date ? ' · b. ' . html_escape(date('Y', strtotime($n->birth_date))) : '')
            . ($deceased && $n->death_date ? ' · d. ' . html_escape(date('Y', strtotime($n->death_date))) : '')
            . ($age !== NULL ? ' (' . $age . ')' : '') . '</p></div>';
     if ($deceased)
     {
-        $html .= '<span class="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-600">In memoriam</span>';
+        $html .= '<span class="lineage-status rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-600">In memoriam</span>';
     }
     if ($partners)
     {
@@ -58,15 +58,16 @@ $node_card = function ($n) use ($can_manage, $t, $child_count, $spouses) {
     }
     if ($can_manage)
     {
-        $html .= '<a href="' . site_url('clan_members/spouses/' . $n->id) . '" class="rounded-lg bg-indigo-50 px-2.5 py-1 text-xs font-semibold text-indigo-700 hover:bg-indigo-100">Spouses</a>';
-        $html .= '<a href="' . site_url('clan_members/edit/' . $n->id) . '" class="rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-200">Edit</a>';
+        $html .= '<div class="lineage-actions flex shrink-0 gap-2">';
+        $html .= '<a href="' . site_url('clan_members/spouses/' . $n->id) . '" class="touch-target rounded-lg bg-indigo-50 px-2.5 py-1 text-xs font-semibold text-indigo-700 hover:bg-indigo-100">Spouses</a>';
+        $html .= '<a href="' . site_url('clan_members/edit/' . $n->id) . '" class="touch-target rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-200">Edit</a></div>';
     }
     return $html . '</div>';
 };
 
 /** Recursive renderer (nested <details> so branches can be collapsed). */
 $render_tree = function ($nodes, $depth) use (&$render_tree, $node_card, $t) {
-    echo '<ul class="space-y-3 ' . ($depth ? 'ml-6 border-l-2 pl-5 ' . $t['line'] : '') . '">';
+    echo '<ul class="space-y-3 ' . ($depth ? 'lineage-branch ml-6 border-l-2 pl-5 ' . $t['line'] : '') . '">';
     foreach ($nodes as $n)
     {
         echo '<li>';
@@ -194,7 +195,7 @@ $render_tree = function ($nodes, $depth) use (&$render_tree, $node_card, $t) {
 
                     <?php if ($can_manage): ?>
                         <div class="mt-5 flex w-full items-center gap-2 border-t border-slate-100 pt-4">
-                            <a href="<?= site_url('clan_members/spouses/' . $m->id) ?>" class="flex-1 rounded-lg bg-indigo-50 px-3 py-1.5 text-center text-xs font-semibold text-indigo-700 transition hover:bg-indigo-100">Spouses</a>
+                            <a href="<?= site_url('clan_members/spouses/' . $m->id) ?>" class="touch-target flex-1 rounded-lg bg-indigo-50 px-3 py-1.5 text-center text-xs font-semibold text-indigo-700 transition hover:bg-indigo-100">Spouses</a>
                             <a href="<?= site_url('clan_members/edit/' . $m->id) ?>" class="flex-1 <?= $btn_edit ?>">Edit</a>
                             <?php if ($kids): ?>
                                 <span title="Remove or move this member's children first" class="cursor-not-allowed rounded-lg bg-slate-50 p-2 text-slate-300">
@@ -215,11 +216,11 @@ $render_tree = function ($nodes, $depth) use (&$render_tree, $node_card, $t) {
 
     <!-- TREE VIEW -->
     <div id="tree-view" class="hidden overflow-x-auto rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
-        <div class="mb-4 flex gap-2">
+        <div class="mb-4 flex flex-wrap gap-2">
             <button type="button" id="expand-all" class="rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-200">Expand all</button>
             <button type="button" id="collapse-all" class="rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-200">Collapse all</button>
         </div>
-        <div class="min-w-[22rem]">
+        <div class="min-w-0">
             <?php $render_tree($tree, 0); ?>
         </div>
     </div>
@@ -232,21 +233,20 @@ $render_tree = function ($nodes, $depth) use (&$render_tree, $node_card, $t) {
 
 <?php if ($can_manage): ?>
 <!-- Delete confirm modal -->
-<div id="delete-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/50 p-4 opacity-0 backdrop-blur-sm transition-opacity duration-200">
-    <div id="delete-panel" role="alertdialog" aria-modal="true" aria-labelledby="delete-title"
-         class="w-full max-w-md scale-95 rounded-3xl bg-white p-6 text-center opacity-0 shadow-2xl transition duration-200 sm:p-8">
+<dialog id="delete-modal" class="app-dialog" role="alertdialog" aria-labelledby="delete-title" aria-describedby="delete-description">
+    <div id="delete-panel" class="dialog-panel w-full max-w-md overflow-y-auto rounded-3xl bg-white p-6 text-center shadow-2xl sm:p-8">
         <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-rose-100 text-rose-600">
             <svg class="h-7 w-7" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4m0 4h.01M10.3 3.9L2.4 17.5A2 2 0 004.1 20.5h15.8a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/></svg>
         </div>
         <h2 id="delete-title" class="mt-4 text-xl font-bold">Remove from the tree?</h2>
-        <p class="mt-2 text-sm text-slate-500"><span id="delete-name" class="font-semibold text-slate-800"></span> and their photo will be permanently removed.</p>
+        <p id="delete-description" class="mt-2 text-sm text-slate-500"><span id="delete-name" class="font-semibold text-slate-800"></span> and their photo will be permanently removed.</p>
         <form id="delete-form" method="post" action="" class="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-center">
             <?= csrf_field() ?>
-            <button type="button" onclick="closeDelete()" class="rounded-xl px-5 py-2.5 text-sm font-semibold text-slate-600 ring-1 ring-slate-200 transition hover:bg-slate-50">Keep</button>
+            <button type="button" onclick="closeDelete()" autofocus class="rounded-xl px-5 py-2.5 text-sm font-semibold text-slate-600 ring-1 ring-slate-200 transition hover:bg-slate-50">Keep</button>
             <button type="submit" class="rounded-xl bg-rose-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-rose-500/30 transition hover:bg-rose-700">Yes, remove</button>
         </form>
     </div>
-</div>
+</dialog>
 <?php endif; ?>
 
 <script>
@@ -341,20 +341,18 @@ $render_tree = function ($nodes, $depth) use (&$render_tree, $node_card, $t) {
     /* ----- Delete modal (representatives only) ----- */
     var modal = document.getElementById('delete-modal');
     if (modal) {
-        var panel = document.getElementById('delete-panel');
         var BASE  = "<?= rtrim(site_url('clan_members/delete'), '/') ?>";
         window.openDelete = function (btn) {
             document.getElementById('delete-name').textContent = btn.dataset.name;
             document.getElementById('delete-form').setAttribute('action', BASE + '/' + btn.dataset.id);
-            modal.classList.remove('hidden'); modal.classList.add('flex');
-            requestAnimationFrame(function () { modal.classList.remove('opacity-0'); panel.classList.remove('scale-95', 'opacity-0'); });
+            modal.showModal();
+            document.body.classList.add('dialog-open');
         };
         window.closeDelete = function () {
-            modal.classList.add('opacity-0'); panel.classList.add('scale-95', 'opacity-0');
-            setTimeout(function () { modal.classList.add('hidden'); modal.classList.remove('flex'); }, 200);
+            modal.close();
         };
-        modal.addEventListener('mousedown', function (e) { if (e.target === modal) { window.closeDelete(); } });
-        document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !modal.classList.contains('hidden')) { window.closeDelete(); } });
+        modal.addEventListener('click', function (e) { if (e.target === modal) { window.closeDelete(); } });
+        modal.addEventListener('close', function () { document.body.classList.remove('dialog-open'); });
     }
 })();
 </script>

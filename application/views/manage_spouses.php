@@ -21,15 +21,15 @@ $error_open = '<p class="mt-1.5 text-xs font-medium text-rose-600">';
         <p class="mt-2 text-sm text-white/85">Spouse names are shown on this member’s profile and do not add another generation to the lineage.</p>
     </div>
 
-    <div class="space-y-7 p-6 sm:p-8">
+    <div class="space-y-7 p-5 sm:p-8">
         <section aria-label="Current spouses">
             <h2 class="mb-3 text-sm font-bold text-slate-900">Current spouses</h2>
             <?php if ($spouses): ?>
                 <ul class="space-y-3">
                     <?php foreach ($spouses as $spouse): ?>
-                        <li class="flex items-center justify-between gap-4 rounded-xl border border-slate-200 px-4 py-3">
-                            <span class="font-semibold text-slate-800"><?= html_escape(member_full_name($spouse)) ?></span>
-                            <form method="post" action="<?= site_url('clan_members/spouses/' . $member->id) ?>" onsubmit="return confirm('Remove this spouse name?');">
+                        <li class="flex flex-col items-start justify-between gap-3 rounded-xl border border-slate-200 px-4 py-3 sm:flex-row sm:items-center">
+                            <span class="min-w-0 font-semibold text-slate-800"><?= html_escape(member_full_name($spouse)) ?></span>
+                            <form method="post" action="<?= site_url('clan_members/spouses/' . $member->id) ?>" class="shrink-0" onsubmit="return confirm('Remove this spouse name?');">
                                 <?= csrf_field() ?>
                                 <input type="hidden" name="spouse_action" value="delete">
                                 <input type="hidden" name="spouse_id" value="<?= (int) $spouse->id ?>">
@@ -64,7 +64,7 @@ $error_open = '<p class="mt-1.5 text-xs font-medium text-rose-600">';
                     </div>
                 </div>
                 <div class="flex flex-col-reverse gap-3 border-t border-slate-100 pt-5 sm:flex-row sm:justify-end">
-                    <a href="<?= site_url('clan_members/clan/' . $clan->id) ?>#m-<?= (int) $member->id ?>" class="rounded-xl px-5 py-2.5 text-center text-sm font-semibold text-slate-600 ring-1 ring-slate-200 transition hover:bg-slate-50">Back to clan</a>
+                    <a href="<?= site_url('clan_members/clan/' . $clan->id) ?>#m-<?= (int) $member->id ?>" class="touch-target rounded-xl px-5 py-2.5 text-center text-sm font-semibold text-slate-600 ring-1 ring-slate-200 transition hover:bg-slate-50">Back to clan</a>
                     <button type="submit" class="rounded-xl px-6 py-2.5 text-sm font-semibold text-white shadow-lg transition hover:-translate-y-0.5 <?= $t['button'] ?>">Add spouse</button>
                 </div>
             </form>

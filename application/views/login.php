@@ -5,7 +5,7 @@ $input = 'block w-full rounded-xl border border-slate-300 bg-white px-3.5 py-3 t
 
 <div class="mx-auto mt-6 max-w-md sm:mt-12">
     <div class="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xl shadow-slate-200/70">
-        <div class="bg-gradient-to-br from-indigo-600 via-emerald-600 to-rose-600 px-8 py-8 text-center">
+        <div class="bg-gradient-to-br from-indigo-600 via-emerald-600 to-rose-600 px-5 py-6 text-center sm:px-8 sm:py-8">
             <span class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-white/20 text-white ring-1 ring-white/40">
                 <svg class="h-7 w-7" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 10-8 0v4m-2 0h12a1 1 0 011 1v7a1 1 0 01-1 1H6a1 1 0 01-1-1v-7a1 1 0 011-1z"/></svg>
             </span>
@@ -13,7 +13,7 @@ $input = 'block w-full rounded-xl border border-slate-300 bg-white px-3.5 py-3 t
             <p class="mt-1 text-sm text-white/80">Sign in to manage your clan's branch of the tree.</p>
         </div>
 
-        <form method="post" action="<?= site_url('login') ?>" class="space-y-5 p-8" autocomplete="on">
+        <form method="post" action="<?= site_url('login') ?>" class="space-y-5 p-5 sm:p-8" autocomplete="on">
             <?= csrf_field() ?>
 
             <?php if ( ! empty($error)): ?>
