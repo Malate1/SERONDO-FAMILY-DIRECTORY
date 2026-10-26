@@ -108,10 +108,15 @@ $render_tree = function ($nodes, $depth) use (&$render_tree, $node_card, $t) {
             </div>
         </div>
         <?php if ($can_manage): ?>
-            <a href="<?= site_url('clan_members/add') ?>" class="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-semibold text-slate-900 shadow-lg transition hover:-translate-y-0.5 hover:bg-slate-100">
-                <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" d="M12 5v14M5 12h14"/></svg>
-                Add member
-            </a>
+            <div class="flex flex-wrap gap-3">
+                <a href="<?= site_url('clan_members/edit_clan') ?>" class="inline-flex items-center justify-center gap-2 rounded-xl bg-white/15 px-5 py-3 text-sm font-semibold text-white ring-1 ring-white/30 transition hover:bg-white/25">
+                    Edit clan details
+                </a>
+                <a href="<?= site_url('clan_members/add') ?>" class="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-semibold text-slate-900 shadow-lg transition hover:-translate-y-0.5 hover:bg-slate-100">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" d="M12 5v14M5 12h14"/></svg>
+                    Add member
+                </a>
+            </div>
         <?php endif; ?>
     </div>
 </section>

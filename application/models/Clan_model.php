@@ -25,6 +25,14 @@ class Clan_model extends CI_Model
         return $this->db->get_where('clans', ['id' => (int) $id])->row();
     }
 
+    public function update_details($id, $data)
+    {
+        return $this->db->where('id', (int) $id)->update('clans', [
+            'clan_name'   => $data['clan_name'],
+            'description' => $data['description'],
+        ]);
+    }
+
     /** Stats for a single clan (member count + deepest generation + per-generation counts). */
     public function get_stats($clan_id)
     {

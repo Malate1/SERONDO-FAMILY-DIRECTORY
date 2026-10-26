@@ -72,6 +72,43 @@ class Clan_members extends CI_Controller
      *  REPRESENTATIVE-ONLY ACTIONS
      * ================================================================== */
 
+    public function edit_clan()
+    {
+        $rep = $this->_require_rep();
+        $clan = $this->Clan_model->get($rep->clan_id);
+        if ( ! $clan)
+        {
+            show_404();
+        }
+
+        if ($this->input->method() === 'post')
+        {
+            $this->form_validation->set_rules('clan_name', 'Clan name', 'trim|required|min_length[2]|max_length[100]');
+            $this->form_validation->set_rules('description', 'Description', 'trim|max_length[2000]');
+
+            if ($this->form_validation->run())
+            {
+                $saved = $this->Clan_model->update_details($rep->clan_id, [
+                    'clan_name'   => $this->input->post('clan_name', TRUE),
+                    'description' => $this->input->post('description', TRUE),
+                ]);
+
+                if ($saved)
+                {
+                    $this->session->set_flashdata('success', 'Clan details updated.');
+                    redirect('clan_members/clan/' . (int) $rep->clan_id);
+                }
+
+                $this->session->set_flashdata('error', 'Could not save clan details. Please try again.');
+            }
+        }
+
+        $this->load->view('edit_clan', [
+            'title' => 'Edit clan details',
+            'clan'  => $clan,
+        ]);
+    }
+
     public function add()
     {
         $this->_prepare_management(NULL);
