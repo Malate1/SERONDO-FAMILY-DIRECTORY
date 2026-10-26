@@ -45,6 +45,7 @@ class Clan_members extends CI_Controller
             'recent'  => $this->Member_model->get_recent_per_clan(3),
             'members' => $this->Member_model->get_all(),
             'spouses' => $this->Member_model->get_spouses_by_clan(NULL),
+            'generation_labels' => (array) $this->config->item('generation_labels'),
             'upcoming_events' => $this->Event_model->get_all_with_rsvps(TRUE, 4),
         ]);
     }

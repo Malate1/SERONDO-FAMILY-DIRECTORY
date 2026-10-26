@@ -11,7 +11,13 @@ details > summary::-webkit-details-marker { display: none; }
     margin: 12mm;
 }
 
+@page full-family-tree {
+    size: A3 landscape;
+    margin: 12mm;
+}
+
 .print-clan-chart { page: clan-chart; }
+.print-full-family-tree { page: full-family-tree; }
 
 .site-nav {
     position: absolute;
@@ -200,6 +206,75 @@ body.dialog-open { overflow: hidden; }
     }
 
     body.print-clan-chart #tree-view li {
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+
+    body.print-full-family-tree {
+        background: #fff !important;
+        color: #0f172a !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    body.print-full-family-tree .site-header,
+    body.print-full-family-tree footer,
+    body.print-full-family-tree .app-main > :not(#family-tree-modal) {
+        display: none !important;
+    }
+
+    body.print-full-family-tree .app-main {
+        width: 100% !important;
+        max-width: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        overflow: visible !important;
+    }
+
+    body.print-full-family-tree #family-tree-modal {
+        position: static !important;
+        inset: auto !important;
+        display: block !important;
+        width: 100% !important;
+        max-width: none !important;
+        height: auto !important;
+        max-height: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        overflow: visible !important;
+        background: #fff !important;
+    }
+
+    body.print-full-family-tree #family-tree-modal::backdrop {
+        display: none !important;
+    }
+
+    body.print-full-family-tree #family-tree-modal .dialog-panel {
+        width: 100% !important;
+        max-width: none !important;
+        max-height: none !important;
+        overflow: visible !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+    }
+
+    body.print-full-family-tree #family-tree-modal header {
+        border: 0 !important;
+        padding: 0 0 1rem !important;
+    }
+
+    body.print-full-family-tree #family-tree-help,
+    body.print-full-family-tree #close-family-tree {
+        display: none !important;
+    }
+
+    body.print-full-family-tree #family-tree-scroll {
+        overflow: visible !important;
+        padding: 0 !important;
+        background: #fff !important;
+    }
+
+    body.print-full-family-tree #family-tree-chart article {
         break-inside: avoid;
         page-break-inside: avoid;
     }

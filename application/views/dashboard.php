@@ -35,9 +35,11 @@ foreach ($members as $member)
     }
     $tree_members[(int) $member->clan_id][] = [
         'id'         => (int) $member->id,
+        'clan_id'    => (int) $member->clan_id,
         'parent_id'  => $member->parent_id === NULL ? NULL : (int) $member->parent_id,
         'generation' => (int) $member->generation,
         'name'       => member_full_name($member),
+        'clan_name'  => $member->clan_name,
         'spouses'    => $spouse_names,
     ];
 }
@@ -51,12 +53,19 @@ foreach ($members as $member)
             <h1 class="mt-1 text-3xl font-bold tracking-tight text-white sm:text-4xl">Four clans. One family.</h1>
             <p class="mt-2 max-w-xl text-slate-300">Find your relatives, trace your branch back to the clan ancestor, and see who's coming to the reunion.</p>
         </div>
-        <?php if ($rep): ?>
-            <a href="<?= site_url('clan_members/add') ?>" class="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-semibold text-slate-900 shadow-lg transition hover:-translate-y-0.5 hover:bg-slate-100">
-                <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" d="M12 5v14M5 12h14"/></svg>
-                Add a member to my clan
-            </a>
-        <?php endif; ?>
+        <div class="flex flex-wrap gap-3">
+            <?php if ($total > 0): ?>
+                <button type="button" id="generate-full-tree" class="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-semibold text-slate-900 shadow-lg transition hover:-translate-y-0.5 hover:bg-slate-100">
+                    Generate full family tree
+                </button>
+            <?php endif; ?>
+            <?php if ($rep): ?>
+                <a href="<?= site_url('clan_members/add') ?>" class="inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-500 px-5 py-3 text-sm font-semibold text-white shadow-lg transition hover:-translate-y-0.5 hover:bg-indigo-400">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" d="M12 5v14M5 12h14"/></svg>
+                    Add a member to my clan
+                </a>
+            <?php endif; ?>
+        </div>
     </div>
 </section>
 
@@ -200,11 +209,14 @@ foreach ($members as $member)
                 <h2 id="family-tree-title" class="text-xl font-bold text-slate-900">Family tree</h2>
                 <p id="family-tree-help" class="mt-1 text-sm text-slate-500">Scroll across and down to explore the connected generations.</p>
             </div>
-            <button type="button" id="close-family-tree" aria-label="Close family tree" class="shrink-0 rounded-xl p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900">
-                <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 6l12 12M18 6L6 18"/></svg>
-            </button>
+            <div class="flex shrink-0 items-center gap-2">
+                <button type="button" id="print-family-tree" class="rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-indigo-700">Generate PDF Chart</button>
+                <button type="button" id="close-family-tree" aria-label="Close family tree" class="shrink-0 rounded-xl p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 6l12 12M18 6L6 18"/></svg>
+                </button>
+            </div>
         </header>
-        <div tabindex="0" role="region" aria-label="Family tree chart" aria-describedby="family-tree-help" class="min-h-0 overflow-auto overscroll-contain bg-slate-50 p-4 sm:p-6">
+        <div id="family-tree-scroll" tabindex="0" role="region" aria-label="Family tree chart" aria-describedby="family-tree-help" class="min-h-0 overflow-auto overscroll-contain bg-slate-50 p-4 sm:p-6">
             <div id="family-tree-chart" class="relative"></div>
         </div>
     </section>
@@ -437,6 +449,9 @@ foreach ($members as $member)
     var treeTitle = document.getElementById('family-tree-title');
     var treeChart = document.getElementById('family-tree-chart');
     var closeTree = document.getElementById('close-family-tree');
+    var treeScroll = document.getElementById('family-tree-scroll');
+    var generationLabels = <?= json_encode($generation_labels, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) ?>;
+    var clanColors = ['#4f46e5', '#059669', '#d97706', '#e11d48'];
 
     function makeElement(tag, className, text) {
         var element = document.createElement(tag);
@@ -446,11 +461,19 @@ foreach ($members as $member)
     }
 
     function generateTree(clanId) {
-        var members = membersByClan[clanId] || [];
+        var members = clanId === 'all'
+            ? Object.keys(membersByClan).reduce(function (allMembers, key) { return allMembers.concat(membersByClan[key]); }, [])
+            : (membersByClan[clanId] || []);
         var nodes = {};
         var roots = [];
-        var nextRow = 0;
+        var nextColumn = 0;
         var maxGeneration = 0;
+        var cardWidth = 190;
+        var cardHeight = 76;
+        var columnGap = 48;
+        var rowGap = 104;
+        var leftPadding = 24;
+        var topPadding = 66;
 
         members.forEach(function (member) {
             nodes[member.id] = {
@@ -473,18 +496,18 @@ foreach ($members as $member)
 
         function position(node) {
             if (node.children.length === 0) {
-                node.y = 70 + nextRow * 112;
-                nextRow++;
+                node.x = leftPadding + nextColumn * (cardWidth + columnGap);
+                nextColumn++;
             } else {
                 node.children.forEach(position);
-                node.y = node.children.reduce(function (sum, child) { return sum + child.y; }, 0) / node.children.length;
+                node.x = node.children.reduce(function (sum, child) { return sum + child.x; }, 0) / node.children.length;
             }
-            node.x = 18 + (node.member.generation - 1) * 250;
+            node.y = topPadding + (node.member.generation - 1) * (cardHeight + rowGap);
         }
         roots.forEach(position);
 
-        var width = Math.max(300, (maxGeneration - 1) * 250 + 226);
-        var height = Math.max(170, nextRow * 112 + 20);
+        var width = Math.max(300, nextColumn * (cardWidth + columnGap) - columnGap + leftPadding * 2);
+        var height = Math.max(170, maxGeneration * (cardHeight + rowGap) + topPadding);
         treeChart.textContent = '';
         treeChart.style.width = width + 'px';
         treeChart.style.height = height + 'px';
@@ -498,39 +521,57 @@ foreach ($members as $member)
 
         Object.keys(nodes).forEach(function (id) {
             var node = nodes[id];
+            if (node.children.length === 0) { return; }
+            var branchY = node.y + cardHeight + rowGap / 2;
+            var parentX = node.x + cardWidth / 2;
+            var childCenters = node.children.map(function (child) { return child.x + cardWidth / 2; });
+            var pathData = 'M ' + parentX + ' ' + (node.y + cardHeight) + ' V ' + branchY;
+            if (childCenters.length > 1) {
+                pathData += ' M ' + Math.min.apply(Math, childCenters) + ' ' + branchY + ' H ' + Math.max.apply(Math, childCenters);
+            }
             node.children.forEach(function (child) {
-                var x1 = node.x + 190;
-                var y1 = node.y;
-                var x2 = child.x;
-                var y2 = child.y;
-                var mid = (x1 + x2) / 2;
-                var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-                path.setAttribute('d', 'M ' + x1 + ' ' + y1 + ' C ' + mid + ' ' + y1 + ', ' + mid + ' ' + y2 + ', ' + x2 + ' ' + y2);
-                path.setAttribute('fill', 'none');
-                path.setAttribute('stroke', '#cbd5e1');
-                path.setAttribute('stroke-width', '2');
-                svg.appendChild(path);
+                pathData += ' M ' + (child.x + cardWidth / 2) + ' ' + branchY + ' V ' + child.y;
             });
+
+            var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            path.setAttribute('d', pathData);
+            path.setAttribute('fill', 'none');
+            path.setAttribute('stroke', clanColors[(node.member.clan_id - 1) % clanColors.length]);
+            path.setAttribute('stroke-width', '2');
+            svg.appendChild(path);
         });
         treeChart.appendChild(svg);
 
         for (var generation = 1; generation <= maxGeneration; generation++) {
-            var heading = makeElement('div', 'absolute top-3 text-xs font-bold uppercase tracking-wider text-slate-400', 'Generation ' + generation);
-            heading.style.left = (18 + (generation - 1) * 250) + 'px';
+            var label = generation === 1 ? 'Four siblings' : (generationLabels[generation] || '');
+            var heading = makeElement('div', 'absolute left-0 text-xs font-bold uppercase tracking-wider text-slate-500', 'Generation ' + generation + (label ? ' · ' + label : ''));
+            heading.style.top = (topPadding + (generation - 1) * (cardHeight + rowGap) - 24) + 'px';
             treeChart.appendChild(heading);
         }
         Object.keys(nodes).forEach(function (id) {
             var node = nodes[id];
-            var card = makeElement('article', 'absolute flex h-[76px] w-[190px] flex-col justify-center rounded-2xl border border-slate-200 bg-white px-4 shadow-sm');
+            var card = makeElement('article', 'absolute flex h-[76px] w-[190px] flex-col justify-center rounded-xl border border-slate-300 border-t-4 border-t-cyan-500 bg-cyan-50 px-3 shadow-sm');
             card.style.left = node.x + 'px';
-            card.style.top = (node.y - 38) + 'px';
+            card.style.top = node.y + 'px';
+            card.style.borderTopColor = clanColors[(node.member.clan_id - 1) % clanColors.length];
             card.appendChild(makeElement('h3', 'truncate text-sm font-bold text-slate-900', node.member.name));
-            card.appendChild(makeElement('p', 'mt-1 text-xs text-slate-500', 'Generation ' + node.member.generation));
+            var stage = generationLabels[node.member.generation] || ('Generation ' + node.member.generation);
+            card.appendChild(makeElement('p', 'mt-1 truncate text-xs text-slate-600', node.member.clan_name + ' · ' + stage));
             if (node.member.spouses.length) {
-                card.appendChild(makeElement('p', 'mt-1 truncate text-xs text-indigo-600', 'Spouse: ' + node.member.spouses.join(', ')));
+                card.appendChild(makeElement('p', 'mt-1 truncate text-xs text-indigo-700', 'Spouse: ' + node.member.spouses.join(', ')));
             }
             treeChart.appendChild(card);
         });
+    }
+
+    function openTree(clanId, title) {
+        generateTree(clanId);
+        treeTitle.textContent = title;
+        treeScroll.scrollTop = 0;
+        treeScroll.scrollLeft = 0;
+        treeModal.showModal();
+        document.body.classList.add('dialog-open');
+        closeTree.focus();
     }
 
     function hideTree() {
@@ -541,12 +582,29 @@ foreach ($members as $member)
     Array.prototype.forEach.call(document.querySelectorAll('[data-generate-tree]'), function (button) {
         button.addEventListener('click', function () {
             var clanId = button.getAttribute('data-generate-tree');
-            generateTree(clanId);
-            treeTitle.textContent = button.getAttribute('data-clan-name') + ' family tree';
-            treeModal.showModal();
-            document.body.classList.add('dialog-open');
-            closeTree.focus();
+            openTree(clanId, button.getAttribute('data-clan-name') + ' family tree');
         });
+    });
+
+    var fullTreeButton = document.getElementById('generate-full-tree');
+    if (fullTreeButton) {
+        fullTreeButton.addEventListener('click', function () {
+            openTree('all', 'Full family tree across all clans');
+        });
+    }
+
+    var printTreeButton = document.getElementById('print-family-tree');
+    printTreeButton.addEventListener('click', function () {
+        var previousTitle = document.title;
+        var restorePrintState = function () {
+            document.body.classList.remove('print-full-family-tree');
+            document.title = previousTitle;
+            window.removeEventListener('afterprint', restorePrintState);
+        };
+        document.body.classList.add('print-full-family-tree');
+        document.title = 'Full_Clan_Family_Tree';
+        window.addEventListener('afterprint', restorePrintState);
+        window.print();
     });
     closeTree.addEventListener('click', hideTree);
     treeModal.addEventListener('click', function (event) {

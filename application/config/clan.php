@@ -1,15 +1,15 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed');
 
-/** Deepest generation allowed in a clan tree (Gen 1 = clan ancestor). */
+/** Deepest generation allowed in a clan tree. */
 $config['max_generation'] = 5;
 
 /** Optional friendly labels shown next to the generation number. */
 $config['generation_labels'] = [
-    1 => 'Clan Ancestor',
-    2 => '',
-    3 => 'Grandfather generation',
-    4 => 'Reunion generation',
-    5 => 'Children',
+    1 => 'Sibling generation',
+    2 => "Grandfather's generation",
+    3 => "Mother's generation",
+    4 => 'My generation',
+    5 => "My children's generation",
 ];
 
 /** Failed-login throttle (per browser session). */
