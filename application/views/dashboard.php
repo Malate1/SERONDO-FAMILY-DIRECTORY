@@ -217,7 +217,7 @@ foreach ($members as $member)
         <h2 id="relationship-title" class="mt-1 text-2xl font-bold tracking-tight text-slate-900">How are we related?</h2>
         <p class="mt-2 text-sm text-slate-500">Choose two relatives to find their closest recorded common ancestor.</p>
     </div>
-    <form id="relationship-form" class="mt-6 grid grid-cols-1 items-end gap-4 lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)_auto]">
+    <form id="relationship-form" data-submit-mode="client" data-confirm-title="Find this relationship?" data-confirm-text="Compare the selected relatives using the recorded family tree?" data-confirm-fields="relative-one relative-two" data-confirm-button="Find relationship" class="mt-6 grid grid-cols-1 items-end gap-4 lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)_auto]">
         <div>
             <label for="relative-one" class="mb-1.5 block text-sm font-semibold text-slate-700">First relative</label>
             <select id="relative-one" required class="block w-full rounded-xl border border-slate-300 bg-white px-3.5 py-3 text-sm text-slate-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-500/15">
@@ -383,18 +383,25 @@ foreach ($members as $member)
         return first.name + ' and ' + second.name + ' are ' + cousinTerm + '.';
     }
 
-    relationshipForm.addEventListener('submit', function (event) {
+    function showRelationship(message, type) {
+        relationshipResult.classList.remove('hidden');
+        relationshipResult.textContent = message;
+        if (window.AppUI) { window.AppUI.notify(type, message); }
+    }
+
+    function findRelationship(event) {
         event.preventDefault();
+        if (event.type === 'submit' && window.AppUI && window.AppUI.formsReady) { return; }
         var first = relativesById[relativeOne.value];
         var second = relativesById[relativeTwo.value];
         relationshipResult.classList.remove('hidden');
 
         if (!first || !second) {
-            relationshipResult.textContent = 'Select two family members to find their relationship.';
+            showRelationship('Select two family members to find their relationship.', 'error');
             return;
         }
         if (first.id === second.id) {
-            relationshipResult.textContent = 'Please choose two different family members.';
+            showRelationship('Please choose two different family members.', 'warning');
             return;
         }
 
@@ -416,12 +423,14 @@ foreach ($members as $member)
         });
 
         if (!sharedAncestor) {
-            relationshipResult.textContent = 'No common ancestor is recorded for ' + first.name + ' and ' + second.name + '. The family tree only includes recorded parent-child links.';
+            showRelationship('No common ancestor is recorded for ' + first.name + ' and ' + second.name + '. The family tree only includes recorded parent-child links.', 'info');
             return;
         }
-        relationshipResult.textContent = describeRelationship(first, second, firstDistance, secondDistance) +
-            ' Their closest shared ancestor is ' + sharedAncestor.name + ' (Generation ' + sharedAncestor.generation + ').';
-    });
+        showRelationship(describeRelationship(first, second, firstDistance, secondDistance) +
+            ' Their closest shared ancestor is ' + sharedAncestor.name + ' (Generation ' + sharedAncestor.generation + ').', 'success');
+    }
+    relationshipForm.addEventListener('submit', findRelationship);
+    relationshipForm.addEventListener('app:confirmed-submit', findRelationship);
 
     var membersByClan = <?= json_encode($tree_members, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) ?>;
     var treeModal = document.getElementById('family-tree-modal');

@@ -13,8 +13,12 @@ $input = 'block w-full rounded-xl border border-slate-300 bg-white px-3.5 py-3 t
             <p class="mt-1 text-sm text-white/80">Sign in to manage your clan's branch of the tree.</p>
         </div>
 
-        <form method="post" action="<?= site_url('login') ?>" class="space-y-5 p-5 sm:p-8" autocomplete="on">
+        <form data-confirm-title="Sign in?" data-confirm-text="Continue to your representative account?" data-confirm-fields="username" data-confirm-button="Sign in" data-submit-label="Signing in…" method="post" action="<?= site_url('login') ?>" class="space-y-5 p-5 sm:p-8" autocomplete="on">
             <?= csrf_field() ?>
+
+            <?php if (validation_errors()): ?>
+                <div data-notification="error" class="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-800" role="alert">Please correct the highlighted sign-in fields.</div>
+            <?php endif; ?>
 
             <?php if ( ! empty($error)): ?>
                 <div data-notification="error" class="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-800" role="alert"><?= html_escape($error) ?></div>

@@ -27,7 +27,7 @@ $event_value = function ($field, $format = NULL) use ($event) {
         <h1 class="text-2xl font-bold tracking-tight text-white"><?= html_escape($title) ?></h1>
         <p class="mt-2 text-sm text-white/85">Share a clan event or add it to the calendar for all clans.</p>
     </div>
-    <form method="post" action="<?= $event ? site_url('events/edit/' . $event->id) : site_url('events/create') ?>" class="space-y-5 p-5 sm:p-8">
+    <form data-confirm-title="<?= $event ? 'Save event changes?' : 'Create this event?' ?>" data-confirm-text="Save this event to the clan calendar?" data-confirm-fields="title" data-confirm-button="<?= $event ? 'Save changes' : 'Create event' ?>" data-cancel-button="Keep editing" data-submit-label="Saving…" method="post" action="<?= $event ? site_url('events/edit/' . $event->id) : site_url('events/create') ?>" class="space-y-5 p-5 sm:p-8">
         <?= csrf_field() ?>
         <?php if (validation_errors()): ?>
             <div data-notification="error" class="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-800" role="alert">Please correct the highlighted fields and try again.</div>

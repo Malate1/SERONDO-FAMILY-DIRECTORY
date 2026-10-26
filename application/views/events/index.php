@@ -94,7 +94,7 @@ foreach ($events as $event)
                         <?php if ($can_manage): ?>
                             <div class="flex shrink-0 gap-2 sm:justify-end">
                                 <a href="<?= site_url('events/edit/' . $event->id) ?>" class="touch-target rounded-lg bg-slate-100 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-200">Edit</a>
-                                <form method="post" action="<?= site_url('events/delete/' . $event->id) ?>" onsubmit="return confirm('Delete this event and all branch headcounts?');">
+                                <form data-confirm-title="Delete this event?" data-confirm-text="<?= html_escape($event->title . ' and all branch headcounts will be permanently removed.') ?>" data-confirm-danger="true" data-confirm-button="Delete event" data-submit-label="Deleting…" method="post" action="<?= site_url('events/delete/' . $event->id) ?>">
                                     <?= csrf_field() ?>
                                     <button type="submit" class="rounded-lg bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-700 hover:bg-rose-100">Delete</button>
                                 </form>
@@ -118,7 +118,7 @@ foreach ($events as $event)
                         <?php endif; ?>
 
                         <?php if ($can_rsvp): ?>
-                            <form method="post" action="<?= site_url('events/rsvp/' . $event->id) ?>" class="mt-4 flex flex-col gap-3 sm:flex-row sm:items-end">
+                            <form data-confirm-title="Save headcount?" data-confirm-text="Save this attendee count for your clan?" data-confirm-fields="headcount" data-confirm-button="Save headcount" data-submit-label="Saving…" method="post" action="<?= site_url('events/rsvp/' . $event->id) ?>" class="mt-4 flex flex-col gap-3 sm:flex-row sm:items-end">
                                 <?= csrf_field() ?>
                                 <div>
                                     <label for="headcount-<?= (int) $event->id ?>" class="mb-1 block text-xs font-semibold text-slate-600"><?= html_escape($rep->clan_name) ?> attendees</label>

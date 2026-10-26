@@ -29,7 +29,7 @@ $error_open = '<p class="mt-1.5 text-xs font-medium text-rose-600">';
                     <?php foreach ($spouses as $spouse): ?>
                         <li class="flex flex-col items-start justify-between gap-3 rounded-xl border border-slate-200 px-4 py-3 sm:flex-row sm:items-center">
                             <span class="min-w-0 font-semibold text-slate-800"><?= html_escape(member_full_name($spouse)) ?></span>
-                            <form method="post" action="<?= site_url('clan_members/spouses/' . $member->id) ?>" class="shrink-0" onsubmit="return confirm('Remove this spouse name?');">
+                            <form data-confirm-title="Remove spouse?" data-confirm-text="<?= html_escape('Remove ' . member_full_name($spouse) . ' from this member’s spouse list?') ?>" data-confirm-danger="true" data-confirm-button="Remove spouse" data-submit-label="Removing…" method="post" action="<?= site_url('clan_members/spouses/' . $member->id) ?>" class="shrink-0">
                                 <?= csrf_field() ?>
                                 <input type="hidden" name="spouse_action" value="delete">
                                 <input type="hidden" name="spouse_id" value="<?= (int) $spouse->id ?>">
@@ -48,18 +48,18 @@ $error_open = '<p class="mt-1.5 text-xs font-medium text-rose-600">';
             <?php if (validation_errors()): ?>
                 <div data-notification="error" class="mb-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-800" role="alert">Please correct the highlighted fields.</div>
             <?php endif; ?>
-            <form method="post" action="<?= site_url('clan_members/spouses/' . $member->id) ?>" class="space-y-4">
+            <form data-confirm-title="Add spouse?" data-confirm-text="Add this spouse to the family member?" data-confirm-fields="first_name last_name" data-confirm-button="Add spouse" data-cancel-button="Keep editing" data-submit-label="Saving…" method="post" action="<?= site_url('clan_members/spouses/' . $member->id) ?>" class="space-y-4">
                 <?= csrf_field() ?>
                 <input type="hidden" name="spouse_action" value="add">
                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div>
                         <label for="spouse-first-name" class="<?= $label ?>">First name</label>
-                        <input id="spouse-first-name" name="first_name" type="text" maxlength="100" required value="<?= set_value('first_name') ?>" class="<?= $input ?>">
+                        <input id="spouse-first-name" name="first_name" type="text" minlength="2" maxlength="100" required value="<?= set_value('first_name') ?>" class="<?= $input ?>">
                         <?= form_error('first_name', $error_open, '</p>') ?>
                     </div>
                     <div>
                         <label for="spouse-last-name" class="<?= $label ?>">Last name</label>
-                        <input id="spouse-last-name" name="last_name" type="text" maxlength="100" required value="<?= set_value('last_name') ?>" class="<?= $input ?>">
+                        <input id="spouse-last-name" name="last_name" type="text" minlength="2" maxlength="100" required value="<?= set_value('last_name') ?>" class="<?= $input ?>">
                         <?= form_error('last_name', $error_open, '</p>') ?>
                     </div>
                 </div>

@@ -9,7 +9,7 @@ $navigation_rep = current_rep();
             <span class="h-2 w-2 shrink-0 rounded-full <?= $navigation_theme['solid'] ?>"></span>
             <span class="truncate"><?= html_escape($navigation_rep->full_name) ?></span>
         </a>
-        <form method="post" action="<?= site_url('logout') ?>">
+        <form data-confirm-title="Sign out?" data-confirm-text="You will need to sign in again to manage your clan." data-confirm-button="Sign out" data-submit-label="Signing out…" method="post" action="<?= site_url('logout') ?>">
             <?= csrf_field() ?>
             <button type="submit" class="touch-target w-full rounded-lg px-3 py-2.5 text-slate-600 transition hover:bg-slate-100">Sign out</button>
         </form>

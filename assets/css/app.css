@@ -28,7 +28,8 @@ details > summary::-webkit-details-marker { display: none; }
 .app-main select { text-overflow: ellipsis; }
 [data-notification][hidden] { display: none; }
 body .swal2-container { z-index: 10000; }
-body .swal2-popup { font-family: inherit; border-radius: 1.5rem; }
+body .swal2-popup { font-family: inherit; border-radius: 1.5rem; max-height: calc(100vh - 2rem); max-height: calc(100dvh - 2rem); overflow-y: auto; }
+body .swal2-html-container { overflow-wrap: anywhere; white-space: pre-line; }
 #toast-container { z-index: 9000; top: max(1rem, env(safe-area-inset-top)); right: max(1rem, env(safe-area-inset-right)); }
 #toast-container > div { opacity: 1; border-radius: .875rem; box-shadow: 0 8px 24px rgb(15 23 42 / 15%); }
 #ui-datepicker-div { z-index: 2000 !important; width: 20rem; max-width: calc(100vw - 2rem); padding: .75rem; border-radius: 1rem; border-color: #cbd5e1; box-shadow: 0 12px 32px rgb(15 23 42 / 20%); font-family: inherit; font-size: 1rem; }

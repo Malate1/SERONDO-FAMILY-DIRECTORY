@@ -203,10 +203,12 @@ $render_tree = function ($nodes, $depth) use (&$render_tree, $node_card, $t) {
                                     <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 7h12M9 7V5a1 1 0 011-1h4a1 1 0 011 1v2m-8 0l1 12a1 1 0 001 1h6a1 1 0 001-1l1-12"/></svg>
                                 </span>
                             <?php else: ?>
-                                <button type="button" onclick="openDelete(this)" data-id="<?= (int) $m->id ?>" data-name="<?= html_escape(member_full_name($m)) ?>"
-                                        aria-label="Delete <?= html_escape(member_full_name($m)) ?>" class="rounded-lg bg-rose-50 p-2 text-rose-600 transition hover:bg-rose-100">
-                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 7h12M9 7V5a1 1 0 011-1h4a1 1 0 011 1v2m-8 0l1 12a1 1 0 001 1h6a1 1 0 001-1l1-12"/></svg>
-                                </button>
+                                <form data-confirm-title="Remove family member?" data-confirm-text="<?= html_escape(member_full_name($m) . ' and their photo will be permanently removed from the tree.') ?>" data-confirm-danger="true" data-confirm-button="Remove member" data-submit-label="Removing…" method="post" action="<?= site_url('clan_members/delete/' . $m->id) ?>" class="shrink-0">
+                                    <?= csrf_field() ?>
+                                    <button type="submit" aria-label="Delete <?= html_escape(member_full_name($m)) ?>" class="rounded-lg bg-rose-50 p-2 text-rose-600 transition hover:bg-rose-100">
+                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 7h12M9 7V5a1 1 0 011-1h4a1 1 0 011 1v2m-8 0l1 12a1 1 0 001 1h6a1 1 0 001-1l1-12"/></svg>
+                                    </button>
+                                </form>
                             <?php endif; ?>
                         </div>
                     <?php endif; ?>
@@ -230,24 +232,6 @@ $render_tree = function ($nodes, $depth) use (&$render_tree, $node_card, $t) {
         <p class="font-bold text-slate-800">No matching members</p>
         <p class="mt-1 text-sm text-slate-500">Try a different name or generation.</p>
     </div>
-<?php endif; ?>
-
-<?php if ($can_manage): ?>
-<!-- Delete confirm modal -->
-<dialog id="delete-modal" class="app-dialog" role="alertdialog" aria-labelledby="delete-title" aria-describedby="delete-description">
-    <div id="delete-panel" class="dialog-panel w-full max-w-md overflow-y-auto rounded-3xl bg-white p-6 text-center shadow-2xl sm:p-8">
-        <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-rose-100 text-rose-600">
-            <svg class="h-7 w-7" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4m0 4h.01M10.3 3.9L2.4 17.5A2 2 0 004.1 20.5h15.8a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/></svg>
-        </div>
-        <h2 id="delete-title" class="mt-4 text-xl font-bold">Remove from the tree?</h2>
-        <p id="delete-description" class="mt-2 text-sm text-slate-500"><span id="delete-name" class="font-semibold text-slate-800"></span> and their photo will be permanently removed.</p>
-        <form id="delete-form" method="post" action="" class="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-center">
-            <?= csrf_field() ?>
-            <button type="button" onclick="closeDelete()" autofocus class="rounded-xl px-5 py-2.5 text-sm font-semibold text-slate-600 ring-1 ring-slate-200 transition hover:bg-slate-50">Keep</button>
-            <button type="submit" class="rounded-xl bg-rose-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-rose-500/30 transition hover:bg-rose-700">Yes, remove</button>
-        </form>
-    </div>
-</dialog>
 <?php endif; ?>
 
 <script>
@@ -339,22 +323,6 @@ $render_tree = function ($nodes, $depth) use (&$render_tree, $node_card, $t) {
         }
     }
 
-    /* ----- Delete modal (representatives only) ----- */
-    var modal = document.getElementById('delete-modal');
-    if (modal) {
-        var BASE  = "<?= rtrim(site_url('clan_members/delete'), '/') ?>";
-        window.openDelete = function (btn) {
-            document.getElementById('delete-name').textContent = btn.dataset.name;
-            document.getElementById('delete-form').setAttribute('action', BASE + '/' + btn.dataset.id);
-            modal.showModal();
-            document.body.classList.add('dialog-open');
-        };
-        window.closeDelete = function () {
-            modal.close();
-        };
-        modal.addEventListener('click', function (e) { if (e.target === modal) { window.closeDelete(); } });
-        modal.addEventListener('close', function () { document.body.classList.remove('dialog-open'); });
-    }
 })();
 </script>
 

@@ -78,7 +78,10 @@ class Auth extends CI_Controller
         {
             show_error('Method not allowed.', 405);
         }
-        $this->session->sess_destroy();
+        // Clear the signed-in session and replace its ID before carrying the logout notice.
+        $this->session->unset_userdata(array_keys($this->session->get_userdata()));
+        $this->session->sess_regenerate(TRUE);
+        $this->session->set_flashdata('success', 'You have been signed out.');
         redirect('login');
     }
 

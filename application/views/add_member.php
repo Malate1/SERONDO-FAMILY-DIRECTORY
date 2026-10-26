@@ -46,7 +46,7 @@ $err_o = '<p class="mt-1.5 text-xs font-medium text-rose-600">';
                 </div>
             <?php endif; ?>
 
-            <form id="member-form" data-confirm-new-member="<?= $member ? 'false' : 'true' ?>" method="post" action="<?= html_escape($action) ?>" enctype="multipart/form-data" class="space-y-5" novalidate>
+            <form id="member-form" data-confirm-title="<?= $member ? 'Save member changes?' : 'Save new family member?' ?>" data-confirm-text="<?= $member ? 'Update this family member in your clan?' : 'Add this family member to your clan?' ?>" data-confirm-fields="first_name last_name" data-confirm-button="<?= $member ? 'Save changes' : 'Yes, save member' ?>" data-cancel-button="Keep editing" data-submit-label="Saving…" method="post" action="<?= html_escape($action) ?>" enctype="multipart/form-data" class="space-y-5" novalidate>
                 <?= csrf_field() ?>
 
                 <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
