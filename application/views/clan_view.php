@@ -136,6 +136,7 @@ $render_tree = function ($nodes, $depth) use (&$render_tree, $node_card, $t) {
         </div>
         <div class="relative w-full lg:w-96">
             <svg class="pointer-events-none absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M17 10.5a6.5 6.5 0 11-13 0 6.5 6.5 0 0113 0z"/></svg>
+            <label for="search" class="sr-only">Search this family branch</label>
             <input id="search" type="search" autocomplete="off" placeholder="Search this branch…"
                    class="w-full rounded-xl border border-slate-300 bg-white py-3 pl-11 pr-4 text-sm shadow-sm placeholder:text-slate-400 transition focus:border-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-500/15">
         </div>
@@ -178,9 +179,9 @@ $render_tree = function ($nodes, $depth) use (&$render_tree, $node_card, $t) {
                     <div class="mt-3 flex flex-wrap justify-center gap-1.5">
                         <span class="rounded-full px-2.5 py-0.5 text-xs font-semibold ring-1 <?= $t['soft'] ?>"><?= html_escape(generation_label($m->generation)) ?></span>
                     </div>
-                    <p class="mt-2 max-w-full truncate text-xs text-slate-500"><?= $m->parent_name ? 'Child of ' . html_escape($m->parent_name) : 'Clan ancestor' ?></p>
+                    <p class="mobile-wrap mt-2 max-w-full truncate text-xs text-slate-500"><?= $m->parent_name ? 'Child of ' . html_escape($m->parent_name) : 'Clan ancestor' ?></p>
                     <?php if (isset($spouses[(int) $m->id]) && $spouses[(int) $m->id]): ?>
-                        <p class="mt-1 max-w-full truncate text-xs font-medium text-indigo-600">
+                        <p class="mobile-wrap mt-1 max-w-full truncate text-xs font-medium text-indigo-600">
                             Spouse<?= count($spouses[(int) $m->id]) > 1 ? 's' : '' ?>:
                             <?php
                             $spouse_names = [];

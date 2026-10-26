@@ -22,7 +22,7 @@ $input = 'block w-full rounded-xl border border-slate-300 bg-white px-3.5 py-3 t
 
             <div>
                 <label for="username" class="mb-1.5 block text-sm font-semibold text-slate-700">Username</label>
-                <input type="text" id="username" name="username" required maxlength="50" autofocus autocomplete="username"
+                <input type="text" id="username" name="username" required maxlength="50" autocomplete="username" autocapitalize="none" spellcheck="false"
                        value="<?= set_value('username') ?>" placeholder="e.g. rep_alpha" class="<?= $input ?>">
                 <?= form_error('username', '<p class="mt-1.5 text-xs font-medium text-rose-600">', '</p>') ?>
             </div>

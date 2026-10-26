@@ -83,13 +83,13 @@ foreach ($members as $member)
                     $years_old++;
                 }
             ?>
-                <a href="<?= site_url('clan_members/clan/' . $birthday->clan_id) ?>#m-<?= (int) $birthday->id ?>" class="flex items-center gap-3 rounded-2xl border border-white bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+                <a href="<?= site_url('clan_members/clan/' . $birthday->clan_id) ?>#m-<?= (int) $birthday->id ?>" class="grid grid-cols-[3rem_minmax(0,1fr)] items-center gap-x-3 gap-y-2 rounded-2xl border border-white bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
                     <?= member_avatar($birthday, 'h-12 w-12', 'text-sm') ?>
                     <span class="min-w-0 flex-1">
-                        <span class="block truncate text-sm font-bold text-slate-900"><?= html_escape(member_full_name($birthday)) ?></span>
+                        <span class="block text-sm font-bold text-slate-900"><?= html_escape(member_full_name($birthday)) ?></span>
                         <span class="mt-1 block text-xs text-slate-500"><?= $is_today ? 'Today' : html_escape($birthday_date) ?><?= $years_old !== NULL ? ' · ' . ($is_today ? 'turns ' : 'turning ') . $years_old : '' ?></span>
                     </span>
-                    <span class="max-w-[40%] shrink-0 rounded-2xl bg-sky-100 px-2 py-1 text-center text-[11px] font-semibold text-sky-700"><?= html_escape(preg_replace('/\s*\(.*\)$/', '', $birthday->clan_name)) ?></span>
+                    <span class="col-start-2 justify-self-start rounded-2xl bg-sky-100 px-2 py-1 text-[11px] font-semibold text-sky-700"><?= html_escape(preg_replace('/\s*\(.*\)$/', '', $birthday->clan_name)) ?></span>
                 </a>
             <?php endforeach; ?>
         </div>
@@ -116,13 +116,13 @@ foreach ($members as $member)
                 $event_colors = ['reunion' => 'bg-rose-500', 'celebration' => 'bg-sky-500', 'memorial' => 'bg-slate-700'];
                 $event_date = new DateTime($event->starts_at);
             ?>
-                <a href="<?= site_url('events') ?>#event-<?= (int) $event->id ?>" class="flex items-center gap-4 rounded-2xl border border-slate-100 p-4 transition hover:border-slate-300 hover:bg-slate-50">
-                    <span class="h-3 w-3 shrink-0 rounded-full <?= isset($event_colors[$event->category]) ? $event_colors[$event->category] : 'bg-indigo-500' ?>"></span>
+                <a href="<?= site_url('events') ?>#event-<?= (int) $event->id ?>" class="grid grid-cols-[0.75rem_minmax(0,1fr)] items-start gap-x-3 gap-y-2 rounded-2xl border border-slate-100 p-4 transition hover:border-slate-300 hover:bg-slate-50">
+                    <span class="mt-1 h-3 w-3 rounded-full <?= isset($event_colors[$event->category]) ? $event_colors[$event->category] : 'bg-indigo-500' ?>"></span>
                     <span class="min-w-0 flex-1">
-                        <span class="block truncate text-sm font-bold text-slate-900"><?= html_escape($event->title) ?></span>
+                        <span class="block text-sm font-bold text-slate-900"><?= html_escape($event->title) ?></span>
                         <span class="mt-1 block text-xs text-slate-500"><?= html_escape($event_date->format('M j, Y · g:i A')) ?> · <?= $event->clan_id === NULL ? 'All clans' : html_escape($event->scope_clan_name) ?></span>
                     </span>
-                    <span class="shrink-0 text-xs font-semibold text-slate-600"><?= (int) $event->total_headcount ?> expected</span>
+                    <span class="col-start-2 text-xs font-semibold text-slate-600"><?= (int) $event->total_headcount ?> expected</span>
                 </a>
             <?php endforeach; ?>
         </div>
@@ -251,6 +251,7 @@ foreach ($members as $member)
         </div>
         <div class="relative w-full lg:w-96">
             <svg class="pointer-events-none absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M17 10.5a6.5 6.5 0 11-13 0 6.5 6.5 0 0113 0z"/></svg>
+            <label for="search" class="sr-only">Search by name across all clans</label>
             <input id="search" type="search" autocomplete="off" placeholder="Search by name across all clans…"
                    class="w-full rounded-xl border border-slate-300 bg-white py-3 pl-11 pr-4 text-sm shadow-sm placeholder:text-slate-400 transition focus:border-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-500/15">
         </div>
@@ -286,7 +287,7 @@ foreach ($members as $member)
                    data-name="<?= html_escape(mb_strtolower(member_full_name($m) . ' ' . $m->clan_name)) ?>">
                     <?= member_avatar($m, 'h-14 w-14', 'text-lg') ?>
                     <div class="min-w-0 flex-1">
-                        <p class="truncate text-sm font-bold text-slate-900"><?= html_escape(member_full_name($m)) ?></p>
+                        <p class="mobile-wrap truncate text-sm font-bold text-slate-900"><?= html_escape(member_full_name($m)) ?></p>
                         <p class="truncate text-xs text-slate-500"><?= html_escape(member_birth_label($m->birth_date)) ?><?= $age !== NULL ? ' · ' . $age . ' yrs' : '' ?></p>
                         <div class="mt-1.5 flex flex-wrap items-center gap-1.5">
                             <span class="rounded-full px-2 py-0.5 text-[11px] font-semibold ring-1 <?= $t['soft'] ?>"><?= html_escape(preg_replace('/\s*\(.*\)$/', '', $m->clan_name)) ?></span>
