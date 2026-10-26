@@ -35,7 +35,7 @@ $err_o = '<p class="mt-1.5 text-xs font-medium text-rose-600">';
 
         <div class="p-5 sm:p-8">
             <?php if (validation_errors() || ! empty($upload_error)): ?>
-                <div class="mb-6 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-800" role="alert">
+                <div data-notification="error" class="mb-6 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-800" role="alert">
                     Please fix the highlighted fields and try again.
                 </div>
             <?php endif; ?>
@@ -46,19 +46,19 @@ $err_o = '<p class="mt-1.5 text-xs font-medium text-rose-600">';
                 </div>
             <?php endif; ?>
 
-            <form id="member-form" method="post" action="<?= html_escape($action) ?>" enctype="multipart/form-data" class="space-y-5" novalidate>
+            <form id="member-form" data-confirm-new-member="<?= $member ? 'false' : 'true' ?>" method="post" action="<?= html_escape($action) ?>" enctype="multipart/form-data" class="space-y-5" novalidate>
                 <?= csrf_field() ?>
 
                 <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
                     <div>
                         <label for="f-first_name" class="<?= $label ?>">First name <span class="text-rose-500">*</span></label>
-                        <input type="text" id="f-first_name" name="first_name" maxlength="100" required placeholder="e.g. Maria"
+                        <input type="text" id="f-first_name" name="first_name" minlength="2" maxlength="100" required placeholder="e.g. Maria"
                                value="<?= set_value('first_name', $member ? $member->first_name : '') ?>" class="<?= $input ?>">
                         <?= form_error('first_name', $err_o, '</p>') ?>
                     </div>
                     <div>
                         <label for="f-last_name" class="<?= $label ?>">Last name <span class="text-rose-500">*</span></label>
-                        <input type="text" id="f-last_name" name="last_name" maxlength="100" required placeholder="e.g. Santos"
+                        <input type="text" id="f-last_name" name="last_name" minlength="2" maxlength="100" required placeholder="e.g. Santos"
                                value="<?= set_value('last_name', $member ? $member->last_name : '') ?>" class="<?= $input ?>">
                         <?= form_error('last_name', $err_o, '</p>') ?>
                     </div>
@@ -73,7 +73,7 @@ $err_o = '<p class="mt-1.5 text-xs font-medium text-rose-600">';
                                    value="<?= $member->parent_name ? html_escape($member->parent_name) : 'Clan ancestor (no parent)' ?>">
                             <p class="mt-1.5 text-xs text-slate-400">Locked: this member is the clan ancestor or already has children in the tree.</p>
                         <?php else: ?>
-                            <select id="f-parent_id" name="parent_id" class="<?= $input ?>">
+                            <select id="f-parent_id" name="parent_id" <?= $first_member ? '' : 'required' ?> class="<?= $input ?>">
                                 <option value="" data-gen="0"><?= $first_member ? '— None (clan ancestor) —' : '— Select a parent —' ?></option>
                                 <?php foreach ($parents as $p): ?>
                                     <option value="<?= (int) $p->id ?>" data-gen="<?= (int) $p->generation ?>"
@@ -100,7 +100,7 @@ $err_o = '<p class="mt-1.5 text-xs font-medium text-rose-600">';
                 <div>
                     <label for="f-birth_date" class="<?= $label ?>">Birth date <span class="font-normal text-slate-400">(optional)</span></label>
                     <input type="date" id="f-birth_date" name="birth_date" max="<?= date('Y-m-d') ?>"
-                           value="<?= set_value('birth_date', $member ? $member->birth_date : '') ?>" class="<?= $input ?> sm:max-w-xs">
+                           value="<?= set_value('birth_date', $member ? $member->birth_date : '') ?>" class="js-date-picker <?= $input ?> sm:max-w-xs">
                     <?= form_error('birth_date', $err_o, '</p>') ?>
                 </div>
 
@@ -135,7 +135,7 @@ $err_o = '<p class="mt-1.5 text-xs font-medium text-rose-600">';
                         <div>
                             <label for="f-death_date" class="<?= $label ?>">Passing date <span class="font-normal text-slate-400">(optional)</span></label>
                             <input type="date" id="f-death_date" name="death_date" max="<?= date('Y-m-d') ?>"
-                                   value="<?= set_value('death_date', $member ? $member->death_date : '') ?>" class="<?= $input ?> sm:max-w-xs">
+                                   value="<?= set_value('death_date', $member ? $member->death_date : '') ?>" class="js-date-picker <?= $input ?> sm:max-w-xs">
                             <?= form_error('death_date', $err_o, '</p>') ?>
                         </div>
                         <div>
@@ -210,7 +210,11 @@ $err_o = '<p class="mt-1.5 text-xs font-medium text-rose-600">';
     var remove  = document.getElementById('f-remove_photo');
     var MAX     = 2 * 1024 * 1024;
 
-    function showError(msg) { errEl.textContent = msg; errEl.classList.toggle('hidden', !msg); }
+    function showError(msg) {
+        errEl.textContent = msg;
+        errEl.classList.toggle('hidden', !msg);
+        if (msg && window.AppUI) { window.AppUI.notify('error', msg); }
+    }
 
     input.addEventListener('change', function () {
         var file = input.files && input.files[0];
@@ -225,10 +229,6 @@ $err_o = '<p class="mt-1.5 text-xs font-medium text-rose-600">';
         reader.readAsDataURL(file);
     });
 
-    document.getElementById('member-form').addEventListener('submit', function () {
-        var b = document.getElementById('form-submit');
-        b.disabled = true; b.classList.add('opacity-70', 'cursor-wait');
-    });
 })();
 </script>
 

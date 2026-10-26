@@ -1,6 +1,6 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed');
 $rep = current_rep();
-$asset_version = max(filemtime(FCPATH . 'assets/css/app.css'), filemtime(FCPATH . 'assets/js/navigation.js'));
+$asset_version = max(filemtime(FCPATH . 'assets/css/app.css'), filemtime(FCPATH . 'assets/js/navigation.js'), filemtime(FCPATH . 'assets/js/app.js'));
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -20,6 +20,9 @@ $asset_version = max(filemtime(FCPATH . 'assets/css/app.css'), filemtime(FCPATH 
             theme: { extend: { fontFamily: { sans: ['"Google Sans"', 'Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'] } } }
         };
     </script>
+    <?php foreach (['jquery-ui/jquery-ui.min.css', 'timepicker/jquery-ui-timepicker-addon.min.css', 'toastr/toastr.min.css'] as $ui_stylesheet): ?>
+        <link href="<?= base_url('assets/vendor/' . $ui_stylesheet) ?>" rel="stylesheet">
+    <?php endforeach; ?>
     <link href="<?= base_url('assets/css/app.css') ?>?v=<?= $asset_version ?>" rel="stylesheet">
 </head>
 <body class="min-h-screen bg-slate-50 font-sans text-slate-900 antialiased">
@@ -50,13 +53,13 @@ $asset_version = max(filemtime(FCPATH . 'assets/css/app.css'), filemtime(FCPATH 
 <main id="main-content" class="app-main page-gutter mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
 
 <?php if ($this->session->flashdata('success')): ?>
-    <div class="mb-6 flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800 shadow-sm" role="status">
+    <div data-notification="success" class="mb-6 flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800 shadow-sm" role="status">
         <svg class="mt-0.5 h-5 w-5 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.7-9.3a1 1 0 00-1.4-1.4L9 10.6 7.7 9.3a1 1 0 00-1.4 1.4l2 2a1 1 0 001.4 0l4-4z" clip-rule="evenodd"/></svg>
         <?= html_escape($this->session->flashdata('success')) ?>
     </div>
 <?php endif; ?>
 <?php if ($this->session->flashdata('error')): ?>
-    <div class="mb-6 flex items-start gap-3 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-800 shadow-sm" role="alert">
+    <div data-notification="error" class="mb-6 flex items-start gap-3 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-800 shadow-sm" role="alert">
         <svg class="mt-0.5 h-5 w-5 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9 6a1 1 0 112 0v4a1 1 0 11-2 0V6zm1 8a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"/></svg>
         <?= html_escape($this->session->flashdata('error')) ?>
     </div>

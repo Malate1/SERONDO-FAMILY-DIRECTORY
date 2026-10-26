@@ -26,6 +26,18 @@ details > summary::-webkit-details-marker { display: none; }
 .app-main :where(.flex, .grid) > * { min-width: 0; }
 .app-main :where(input, select, textarea) { min-width: 0; max-width: 100%; }
 .app-main select { text-overflow: ellipsis; }
+[data-notification][hidden] { display: none; }
+body .swal2-container { z-index: 10000; }
+body .swal2-popup { font-family: inherit; border-radius: 1.5rem; }
+#toast-container { z-index: 9000; top: max(1rem, env(safe-area-inset-top)); right: max(1rem, env(safe-area-inset-right)); }
+#toast-container > div { opacity: 1; border-radius: .875rem; box-shadow: 0 8px 24px rgb(15 23 42 / 15%); }
+#ui-datepicker-div { z-index: 2000 !important; width: 20rem; max-width: calc(100vw - 2rem); padding: .75rem; border-radius: 1rem; border-color: #cbd5e1; box-shadow: 0 12px 32px rgb(15 23 42 / 20%); font-family: inherit; font-size: 1rem; }
+#ui-datepicker-div select { min-height: 2.25rem; border: 1px solid #cbd5e1; border-radius: .375rem; background: white; font-size: 1rem; }
+#ui-datepicker-div .ui-datepicker-header { border: 0; border-radius: .5rem; background: #eef2ff; }
+#ui-datepicker-div .ui-datepicker-calendar td a { display: grid; place-items: center; min-height: 2.25rem; border: 0; border-radius: .375rem; font-size: .875rem; }
+#ui-datepicker-div .ui-state-active { background: #4f46e5; color: white; }
+#ui-datepicker-div .ui-datepicker-buttonpane button { min-height: 2.75rem; padding: .25rem .75rem; }
+#ui-datepicker-div .ui-timepicker-div { padding: .5rem 0; }
 .app-main .mobile-wrap { white-space: normal; overflow: visible; text-overflow: clip; }
 .touch-target { display: inline-flex; align-items: center; justify-content: center; min-height: 2.75rem; }
 :where(a, button, summary, input, select, textarea, label[for]) { touch-action: manipulation; }
@@ -61,6 +73,12 @@ body.dialog-open { overflow: hidden; }
 }
 
 @media (max-width: 639px) {
+    #toast-container { left: max(1rem, env(safe-area-inset-left)); width: auto; }
+    #toast-container > div { width: 100%; }
+    body .swal2-popup { width: 100%; padding: 1rem; }
+    body .swal2-actions { width: 100%; flex-direction: column-reverse; gap: .5rem; }
+    body .swal2-actions button { width: 100%; margin: 0; min-height: 2.75rem; }
+    #ui-datepicker-div { position: fixed !important; top: auto !important; left: max(1rem, env(safe-area-inset-left)) !important; right: max(1rem, env(safe-area-inset-right)) !important; bottom: max(1rem, env(safe-area-inset-bottom)); width: auto; max-height: calc(100vh - 2rem); max-height: calc(100dvh - 2rem); overflow-y: auto; }
     .app-main > section.rounded-3xl { padding: 1.25rem; }
     .app-main .lineage-branch { margin-left: .375rem; padding-left: .5rem; }
     .app-main .lineage-person { display: grid; grid-template-columns: 1rem 2rem minmax(0, 1fr); gap: .375rem; padding: .5rem; }
@@ -73,6 +91,10 @@ body.dialog-open { overflow: hidden; }
 
 @media (min-width: 640px) {
     .app-main .mobile-wrap { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+}
+
+@media (max-height: 500px) and (pointer: coarse) {
+    #ui-datepicker-div { position: fixed !important; top: max(1rem, env(safe-area-inset-top)) !important; left: 50% !important; right: auto !important; bottom: auto; width: 20rem; max-height: calc(100vh - 2rem); max-height: calc(100dvh - 2rem); transform: translateX(-50%); overflow-y: auto; }
 }
 
 @supports (padding: max(0px)) {

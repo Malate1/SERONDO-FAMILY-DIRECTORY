@@ -30,7 +30,7 @@ $event_value = function ($field, $format = NULL) use ($event) {
     <form method="post" action="<?= $event ? site_url('events/edit/' . $event->id) : site_url('events/create') ?>" class="space-y-5 p-5 sm:p-8">
         <?= csrf_field() ?>
         <?php if (validation_errors()): ?>
-            <div class="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-800" role="alert">Please correct the highlighted fields and try again.</div>
+            <div data-notification="error" class="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-800" role="alert">Please correct the highlighted fields and try again.</div>
         <?php endif; ?>
 
         <div>
@@ -62,12 +62,12 @@ $event_value = function ($field, $format = NULL) use ($event) {
         <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
             <div>
                 <label for="event-start" class="<?= $label ?>">Starts</label>
-                <input id="event-start" name="starts_at" type="datetime-local" required value="<?= set_value('starts_at', $event_value('starts_at', 'Y-m-d\TH:i')) ?>" class="<?= $input ?>">
+                <input id="event-start" name="starts_at" type="datetime-local" required value="<?= set_value('starts_at', $event_value('starts_at', 'Y-m-d\TH:i')) ?>" class="js-datetime-picker <?= $input ?>">
                 <?= form_error('starts_at', $error_open, '</p>') ?>
             </div>
             <div>
                 <label for="event-end" class="<?= $label ?>">Ends <span class="font-normal text-slate-400">(optional)</span></label>
-                <input id="event-end" name="ends_at" type="datetime-local" value="<?= set_value('ends_at', $event_value('ends_at', 'Y-m-d\TH:i')) ?>" class="<?= $input ?>">
+                <input id="event-end" name="ends_at" type="datetime-local" value="<?= set_value('ends_at', $event_value('ends_at', 'Y-m-d\TH:i')) ?>" class="js-datetime-picker <?= $input ?>">
                 <?= form_error('ends_at', $error_open, '</p>') ?>
             </div>
         </div>

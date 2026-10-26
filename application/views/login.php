@@ -17,7 +17,7 @@ $input = 'block w-full rounded-xl border border-slate-300 bg-white px-3.5 py-3 t
             <?= csrf_field() ?>
 
             <?php if ( ! empty($error)): ?>
-                <div class="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-800" role="alert"><?= html_escape($error) ?></div>
+                <div data-notification="error" class="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-800" role="alert"><?= html_escape($error) ?></div>
             <?php endif; ?>
 
             <div>

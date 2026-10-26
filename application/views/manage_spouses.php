@@ -46,7 +46,7 @@ $error_open = '<p class="mt-1.5 text-xs font-medium text-rose-600">';
         <section class="border-t border-slate-100 pt-6" aria-label="Add spouse">
             <h2 class="mb-3 text-sm font-bold text-slate-900">Add spouse</h2>
             <?php if (validation_errors()): ?>
-                <div class="mb-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-800" role="alert">Please correct the highlighted fields.</div>
+                <div data-notification="error" class="mb-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-800" role="alert">Please correct the highlighted fields.</div>
             <?php endif; ?>
             <form method="post" action="<?= site_url('clan_members/spouses/' . $member->id) ?>" class="space-y-4">
                 <?= csrf_field() ?>
