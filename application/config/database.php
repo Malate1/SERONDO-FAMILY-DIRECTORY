@@ -75,10 +75,10 @@ $query_builder = TRUE;
 
 $db['default'] = array(
 	'dsn'	=> '',
-	'hostname' => 'localhost',
-	'username' => 'root',
-	'password' => '',
-	'database' => 'clan_directory',
+	'hostname' => 'sql210.infinityfree.com',
+	'username' => 'if0_43271757',
+	'password' => 'l4ooL7oIwDAhC3u',
+	'database' => 'if0_43271757_clan_directory',
 	'dbdriver' => 'mysqli',
 	'dbprefix' => '',
 	'pconnect' => FALSE,
