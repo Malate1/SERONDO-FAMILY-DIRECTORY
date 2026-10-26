@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <title>Clan Reunion Directory</title>
+  <defs>
+    <linearGradient id="clan" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#6366f1"/>
+      <stop offset=".5" stop-color="#10b981"/>
+      <stop offset="1" stop-color="#f43f5e"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="16" fill="url(#clan)"/>
+  <g fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M32 23v8M18 39v-8h28v8"/>
+    <circle cx="32" cy="17" r="6"/>
+    <circle cx="18" cy="45" r="6"/>
+    <circle cx="46" cy="45" r="6"/>
+  </g>
+</svg>
