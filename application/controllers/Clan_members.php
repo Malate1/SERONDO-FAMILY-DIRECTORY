@@ -66,6 +66,7 @@ class Clan_members extends CI_Controller
             'tree'       => $this->Member_model->build_tree($members),
             'spouses'    => $this->Member_model->get_spouses_by_clan($clan->id),
             'can_manage' => ($rep && (int) $rep->clan_id === (int) $clan->id),
+            'max_generation' => $this->max_generation,
         ]);
     }
 
@@ -188,6 +189,135 @@ class Clan_members extends CI_Controller
             'clan'    => $this->Clan_model->get($member->clan_id),
             'member'  => $member,
             'spouses' => $this->Member_model->get_spouses($member->id),
+        ]);
+    }
+
+    /** Add one or more children to a parent in the representative's clan. */
+    public function children($id = NULL)
+    {
+        $rep = $this->_require_rep();
+        $parent = $this->_find_own_member($id);
+        $generation = (int) $parent->generation + 1;
+
+        if ($generation > $this->max_generation)
+        {
+            $this->session->set_flashdata('error', 'This member is already in the deepest allowed generation.');
+            redirect('clan_members/clan/' . $parent->clan_id);
+        }
+
+        $clan = $this->Clan_model->get($rep->clan_id);
+        $rows = [[
+            'first_name' => '',
+            'last_name'  => '',
+            'birth_date' => '',
+        ]];
+        $errors = [];
+        $form_error = NULL;
+
+        if ($this->input->method() === 'post')
+        {
+            $posted_first_names = $this->input->post('first_name', TRUE);
+            $posted_last_names = $this->input->post('last_name', TRUE);
+            $posted_birth_dates = $this->input->post('birth_date', TRUE);
+            $posted_first_names = is_array($posted_first_names) ? $posted_first_names : [];
+            $posted_last_names = is_array($posted_last_names) ? $posted_last_names : [];
+            $posted_birth_dates = is_array($posted_birth_dates) ? $posted_birth_dates : [];
+            $indexes = array_unique(array_merge(
+                array_keys($posted_first_names),
+                array_keys($posted_last_names),
+                array_keys($posted_birth_dates)
+            ));
+            sort($indexes);
+            $rows = [];
+            $children = [];
+
+            foreach ($indexes as $index)
+            {
+                $first_name = isset($posted_first_names[$index]) && is_string($posted_first_names[$index])
+                    ? trim($posted_first_names[$index]) : '';
+                $last_name = isset($posted_last_names[$index]) && is_string($posted_last_names[$index])
+                    ? trim($posted_last_names[$index]) : '';
+                $birth_date = isset($posted_birth_dates[$index]) && is_string($posted_birth_dates[$index])
+                    ? trim($posted_birth_dates[$index]) : '';
+
+                if ($first_name === '' && $last_name === '' && $birth_date === '')
+                {
+                    continue;
+                }
+
+                $row_index = count($rows);
+                $rows[$row_index] = [
+                    'first_name' => $first_name,
+                    'last_name'  => $last_name,
+                    'birth_date' => $birth_date,
+                ];
+
+                if (mb_strlen($first_name) < 2 || mb_strlen($first_name) > 100)
+                {
+                    $errors[$row_index]['first_name'] = 'Enter a first name between 2 and 100 characters.';
+                }
+                if (mb_strlen($last_name) < 2 || mb_strlen($last_name) > 100)
+                {
+                    $errors[$row_index]['last_name'] = 'Enter a last name between 2 and 100 characters.';
+                }
+                if ($birth_date !== '')
+                {
+                    $date = DateTime::createFromFormat('!Y-m-d', $birth_date);
+                    $date_errors = DateTime::getLastErrors();
+                    if ( ! $date || ($date_errors && ($date_errors['warning_count'] || $date_errors['error_count']))
+                        || $date->format('Y-m-d') !== $birth_date || $date > new DateTime('today'))
+                    {
+                        $errors[$row_index]['birth_date'] = 'Enter a valid birth date that is not in the future.';
+                    }
+                }
+
+                if ( ! isset($errors[$row_index]))
+                {
+                    $children[] = [
+                        'first_name' => $first_name,
+                        'last_name'  => $last_name,
+                        'birth_date' => $birth_date !== '' ? $birth_date : NULL,
+                    ];
+                }
+            }
+
+            if ( ! $rows)
+            {
+                $rows = [[
+                    'first_name' => '',
+                    'last_name'  => '',
+                    'birth_date' => '',
+                ]];
+                $form_error = 'Enter at least one child before saving.';
+            }
+            elseif ( ! $errors && $children && $this->Member_model->add_children(
+                $parent->id,
+                $parent->clan_id,
+                $rep->id,
+                $generation,
+                $children
+            ))
+            {
+                $count = count($children);
+                $this->session->set_flashdata('success', $count . ' ' . ($count === 1 ? 'child' : 'children')
+                    . ' added under ' . member_full_name($parent) . '.');
+                redirect('clan_members/clan/' . $parent->clan_id);
+            }
+            elseif ( ! $errors && ! $form_error)
+            {
+                $form_error = 'Could not save the children. Please try again.';
+            }
+        }
+
+        $this->load->view('manage_children', [
+            'title'      => 'Children of ' . member_full_name($parent),
+            'clan'       => $clan,
+            'parent'     => $parent,
+            'children'   => $this->Member_model->get_children($parent->id),
+            'rows'       => $rows,
+            'errors'     => $errors,
+            'form_error' => $form_error,
+            'generation' => $generation,
         ]);
     }
 

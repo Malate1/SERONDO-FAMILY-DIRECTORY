@@ -154,6 +154,38 @@ class Member_model extends CI_Model
         return $this->db->insert_id();
     }
 
+    public function add_children($parent_id, $clan_id, $representative_id, $generation, array $children)
+    {
+        $this->db->trans_begin();
+        foreach ($children as $child)
+        {
+            $saved = $this->db->insert($this->table, [
+                'first_name'                   => $child['first_name'],
+                'last_name'                    => $child['last_name'],
+                'birth_date'                   => $child['birth_date'],
+                'parent_id'                    => (int) $parent_id,
+                'clan_id'                      => (int) $clan_id,
+                'generation'                   => (int) $generation,
+                'is_deceased'                  => 0,
+                'death_date'                   => NULL,
+                'tribute'                      => NULL,
+                'added_by_representative_id'   => (int) $representative_id,
+            ]);
+            if ( ! $saved)
+            {
+                $this->db->trans_rollback();
+                return FALSE;
+            }
+        }
+
+        if ( ! $this->db->trans_status())
+        {
+            $this->db->trans_rollback();
+            return FALSE;
+        }
+        return $this->db->trans_commit();
+    }
+
     public function update($id, array $data)
     {
         return $this->db->where('id', (int) $id)->update($this->table, $data);

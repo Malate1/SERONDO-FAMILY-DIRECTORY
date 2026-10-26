@@ -18,7 +18,7 @@ foreach ($members as $m)
 $btn_edit = 'touch-target rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-200';
 
 /** One lineage-tree node card. */
-$node_card = function ($n) use ($can_manage, $t, $child_count, $spouses) {
+$node_card = function ($n) use ($can_manage, $t, $child_count, $spouses, $max_generation) {
     $kids = isset($child_count[(int) $n->id]) ? $child_count[(int) $n->id] : 0;
     $partners = isset($spouses[(int) $n->id]) ? $spouses[(int) $n->id] : [];
     $deceased = isset($n->is_deceased) && (int) $n->is_deceased === 1;
@@ -60,6 +60,10 @@ $node_card = function ($n) use ($can_manage, $t, $child_count, $spouses) {
     {
         $html .= '<div class="lineage-actions flex shrink-0 gap-2">';
         $html .= '<a href="' . site_url('clan_members/spouses/' . $n->id) . '" class="touch-target rounded-lg bg-indigo-50 px-2.5 py-1 text-xs font-semibold text-indigo-700 hover:bg-indigo-100">Spouses</a>';
+        if ((int) $n->generation < (int) $max_generation)
+        {
+            $html .= '<a href="' . site_url('clan_members/children/' . $n->id) . '" class="touch-target rounded-lg bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700 hover:bg-emerald-100">Children</a>';
+        }
         $html .= '<a href="' . site_url('clan_members/edit/' . $n->id) . '" class="touch-target rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-200">Edit</a></div>';
     }
     return $html . '</div>';
@@ -210,6 +214,9 @@ $render_tree = function ($nodes, $depth) use (&$render_tree, $node_card, $t) {
                     <?php if ($can_manage): ?>
                         <div class="mt-5 flex w-full items-center gap-2 border-t border-slate-100 pt-4">
                             <a href="<?= site_url('clan_members/spouses/' . $m->id) ?>" class="touch-target flex-1 rounded-lg bg-indigo-50 px-3 py-1.5 text-center text-xs font-semibold text-indigo-700 transition hover:bg-indigo-100">Spouses</a>
+                            <?php if ((int) $m->generation < (int) $max_generation): ?>
+                                <a href="<?= site_url('clan_members/children/' . $m->id) ?>" class="touch-target flex-1 rounded-lg bg-emerald-50 px-3 py-1.5 text-center text-xs font-semibold text-emerald-700 transition hover:bg-emerald-100">Children</a>
+                            <?php endif; ?>
                             <a href="<?= site_url('clan_members/edit/' . $m->id) ?>" class="flex-1 <?= $btn_edit ?>">Edit</a>
                             <?php if ($kids): ?>
                                 <span title="Remove or move this member's children first" class="cursor-not-allowed rounded-lg bg-slate-50 p-2 text-slate-300">
