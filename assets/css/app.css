@@ -6,6 +6,13 @@ html {
 details > summary { list-style: none; }
 details > summary::-webkit-details-marker { display: none; }
 
+@page clan-chart {
+    size: A3 landscape;
+    margin: 12mm;
+}
+
+.print-clan-chart { page: clan-chart; }
+
 .site-nav {
     position: absolute;
     inset: 100% 0 auto;
@@ -116,4 +123,84 @@ body.dialog-open { overflow: hidden; }
 
 @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
+}
+
+@media print {
+    body.print-clan-chart {
+        background: #fff !important;
+        color: #0f172a !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    body.print-clan-chart .site-header,
+    body.print-clan-chart footer,
+    body.print-clan-chart .app-main > :not(#tree-view) {
+        display: none !important;
+    }
+
+    body.print-clan-chart .app-main {
+        width: 100% !important;
+        max-width: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        overflow: visible !important;
+    }
+
+    body.print-clan-chart #tree-view {
+        display: block !important;
+        width: 100% !important;
+        overflow: visible !important;
+        border: 0 !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+    }
+
+    body.print-clan-chart #print-chart-heading {
+        display: block !important;
+        margin-bottom: 1rem;
+    }
+
+    body.print-clan-chart .print-controls,
+    body.print-clan-chart .lineage-actions,
+    body.print-clan-chart .lineage-person > svg:first-child,
+    body.print-clan-chart .lineage-person > span.h-4 {
+        display: none !important;
+    }
+
+    body.print-clan-chart #tree-view ul {
+        margin-top: .35rem !important;
+        margin-bottom: .35rem !important;
+    }
+
+    body.print-clan-chart .lineage-branch {
+        margin-left: .5rem !important;
+        padding-left: .75rem !important;
+    }
+
+    body.print-clan-chart .lineage-person {
+        display: flex !important;
+        gap: .5rem !important;
+        padding: .4rem !important;
+        opacity: 1 !important;
+        box-shadow: none !important;
+        transform: none !important;
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+
+    body.print-clan-chart .lineage-person > img,
+    body.print-clan-chart .lineage-person > div[aria-hidden="true"] {
+        width: 1.75rem !important;
+        height: 1.75rem !important;
+    }
+
+    body.print-clan-chart .lineage-person > span.hidden {
+        display: inline !important;
+    }
+
+    body.print-clan-chart #tree-view li {
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
 }

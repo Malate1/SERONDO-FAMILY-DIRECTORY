@@ -107,7 +107,14 @@ $render_tree = function ($nodes, $depth) use (&$render_tree, $node_card, $t) {
                 <span class="rounded-full bg-white/20 px-3 py-1 text-xs font-semibold ring-1 ring-white/30"><?= (int) $stats->max_generation ?> generations</span>
             </div>
         </div>
-        <?php if ($can_manage): ?>
+        <div class="flex flex-wrap gap-3">
+            <?php if ($total > 0): ?>
+                <button type="button" id="generate-pdf" class="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-bold text-slate-900 shadow-lg transition hover:-translate-y-0.5 hover:bg-slate-100">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 16V4m0 0L7 9m5-5 5 5M5 14v5a1 1 0 001 1h12a1 1 0 001-1v-5"/></svg>
+                    Generate PDF Chart
+                </button>
+            <?php endif; ?>
+            <?php if ($can_manage): ?>
             <div class="flex flex-wrap gap-3">
                 <a href="<?= site_url('clan_members/edit_clan') ?>" class="inline-flex items-center justify-center gap-2 rounded-xl bg-white/15 px-5 py-3 text-sm font-semibold text-white ring-1 ring-white/30 transition hover:bg-white/25">
                     Edit clan details
@@ -117,7 +124,8 @@ $render_tree = function ($nodes, $depth) use (&$render_tree, $node_card, $t) {
                     Add member
                 </a>
             </div>
-        <?php endif; ?>
+            <?php endif; ?>
+        </div>
     </div>
 </section>
 
@@ -224,7 +232,14 @@ $render_tree = function ($nodes, $depth) use (&$render_tree, $node_card, $t) {
 
     <!-- TREE VIEW -->
     <div id="tree-view" class="hidden overflow-x-auto rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
-        <div class="mb-4 flex flex-wrap gap-2">
+        <div id="print-chart-heading" class="hidden">
+            <h1 class="text-2xl font-bold text-slate-900"><?= html_escape($clan->clan_name) ?> Family Tree</h1>
+            <?php if ( ! empty($clan->description)): ?>
+                <p class="mt-2 text-sm text-slate-600"><?= html_escape($clan->description) ?></p>
+            <?php endif; ?>
+            <p class="mt-2 text-xs text-slate-500"><?= (int) $stats->member_count ?> members · <?= (int) $stats->max_generation ?> generations</p>
+        </div>
+        <div class="print-controls mb-4 flex flex-wrap gap-2">
             <button type="button" id="expand-all" class="rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-200">Expand all</button>
             <button type="button" id="collapse-all" class="rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-200">Collapse all</button>
         </div>
@@ -317,6 +332,27 @@ $render_tree = function ($nodes, $depth) use (&$render_tree, $node_card, $t) {
     var ex = document.getElementById('expand-all'), co = document.getElementById('collapse-all');
     if (ex) { ex.addEventListener('click', function () { document.querySelectorAll('#tree-view details').forEach(function (d) { d.open = true; }); }); }
     if (co) { co.addEventListener('click', function () { document.querySelectorAll('#tree-view details').forEach(function (d) { d.open = false; }); }); }
+
+    var pdfButton = document.getElementById('generate-pdf');
+    if (pdfButton) {
+        pdfButton.addEventListener('click', function () {
+            var details = Array.prototype.slice.call(document.querySelectorAll('#tree-view details'));
+            var previousOpen = details.map(function (item) { return item.open; });
+            var previousTitle = document.title;
+            var restorePrintState = function () {
+                document.body.classList.remove('print-clan-chart');
+                document.title = previousTitle;
+                details.forEach(function (item, index) { item.open = previousOpen[index]; });
+                window.removeEventListener('afterprint', restorePrintState);
+            };
+
+            document.body.classList.add('print-clan-chart');
+            document.title = <?= json_encode(trim(preg_replace('/[^A-Za-z0-9]+/', '_', $clan->clan_name), '_') . '_Family_Tree') ?>;
+            details.forEach(function (item) { item.open = true; });
+            window.addEventListener('afterprint', restorePrintState);
+            window.print();
+        });
+    }
 
     // Deep link from the dashboard (#m-ID): scroll to and flash that member.
     if (location.hash.indexOf('#m-') === 0) {
