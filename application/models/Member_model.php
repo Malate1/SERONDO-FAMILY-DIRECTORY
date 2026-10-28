@@ -25,6 +25,7 @@ class Member_model extends CI_Model
     {
         return $this->base_query()
             ->order_by('m.clan_id', 'ASC')->order_by('m.generation', 'ASC')
+            ->order_by('m.birth_date IS NULL', 'ASC', FALSE)->order_by('m.birth_date', 'ASC')
             ->order_by('m.last_name', 'ASC')->order_by('m.first_name', 'ASC')
             ->get()->result();
     }
@@ -33,7 +34,9 @@ class Member_model extends CI_Model
     {
         return $this->base_query()
             ->where('m.clan_id', (int) $clan_id)
-            ->order_by('m.generation', 'ASC')->order_by('m.birth_date', 'ASC')->order_by('m.first_name', 'ASC')
+            ->order_by('m.generation', 'ASC')
+            ->order_by('m.birth_date IS NULL', 'ASC', FALSE)->order_by('m.birth_date', 'ASC')
+            ->order_by('m.last_name', 'ASC')->order_by('m.first_name', 'ASC')
             ->get()->result();
     }
 
@@ -112,7 +115,10 @@ class Member_model extends CI_Model
 
     public function get_children($id)
     {
-        return $this->db->where('parent_id', (int) $id)->order_by('birth_date')->get($this->table)->result();
+        return $this->db->where('parent_id', (int) $id)
+            ->order_by('birth_date IS NULL', 'ASC', FALSE)->order_by('birth_date', 'ASC')
+            ->order_by('last_name', 'ASC')->order_by('first_name', 'ASC')
+            ->get($this->table)->result();
     }
 
     /** True when the clan already has a Gen-1 ancestor (a member without a parent). */
@@ -227,6 +233,30 @@ class Member_model extends CI_Model
                 $roots[] = $node;
             }
         }
+
+        $this->sort_by_birthday($roots);
+        foreach ($by_id as $node)
+        {
+            $this->sort_by_birthday($node->children);
+        }
         return $roots;
+    }
+
+    private function sort_by_birthday(array &$members)
+    {
+        usort($members, function ($first, $second) {
+            $first_date = empty($first->birth_date) ? NULL : $first->birth_date;
+            $second_date = empty($second->birth_date) ? NULL : $second->birth_date;
+
+            if ($first_date !== $second_date)
+            {
+                if ($first_date === NULL) return 1;
+                if ($second_date === NULL) return -1;
+                return strcmp($first_date, $second_date);
+            }
+
+            $last_name_order = strcasecmp($first->last_name, $second->last_name);
+            return $last_name_order !== 0 ? $last_name_order : strcasecmp($first->first_name, $second->first_name);
+        });
     }
 }
