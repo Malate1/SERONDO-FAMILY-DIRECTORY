@@ -210,7 +210,7 @@ foreach ($members as $member)
                 <p id="family-tree-help" class="mt-1 text-sm text-slate-500">Scroll across and down to explore the connected generations.</p>
             </div>
             <div class="flex shrink-0 items-center gap-2">
-                <button type="button" id="print-family-tree" class="rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-indigo-700">Generate PDF Chart</button>
+                <button type="button" id="print-family-tree" class="rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-indigo-700">Download PDF Chart</button>
                 <button type="button" id="close-family-tree" aria-label="Close family tree" class="shrink-0 rounded-xl p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900">
                     <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 6l12 12M18 6L6 18"/></svg>
                 </button>
@@ -452,6 +452,9 @@ foreach ($members as $member)
     var treeScroll = document.getElementById('family-tree-scroll');
     var generationLabels = <?= json_encode($generation_labels, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) ?>;
     var clanColors = ['#4f46e5', '#059669', '#d97706', '#e11d48'];
+    var treeLayout = null;
+    var activeTreeTitle = 'Full Clan Family Tree';
+    var pdfExportInProgress = false;
 
     function makeElement(tag, className, text) {
         var element = document.createElement(tag);
@@ -508,6 +511,18 @@ foreach ($members as $member)
 
         var width = Math.max(300, nextColumn * (cardWidth + columnGap) - columnGap + leftPadding * 2);
         var height = Math.max(170, maxGeneration * (cardHeight + rowGap) + topPadding);
+        treeLayout = {
+            nodes: nodes,
+            width: width,
+            height: height,
+            maxGeneration: maxGeneration,
+            cardWidth: cardWidth,
+            cardHeight: cardHeight,
+            cellWidth: cardWidth + columnGap,
+            rowHeight: cardHeight + rowGap,
+            leftPadding: leftPadding,
+            topPadding: topPadding
+        };
         treeChart.textContent = '';
         treeChart.style.width = width + 'px';
         treeChart.style.height = height + 'px';
@@ -566,6 +581,7 @@ foreach ($members as $member)
 
     function openTree(clanId, title) {
         generateTree(clanId);
+        activeTreeTitle = title;
         treeTitle.textContent = title;
         treeScroll.scrollTop = 0;
         treeScroll.scrollLeft = 0;
@@ -594,17 +610,173 @@ foreach ($members as $member)
     }
 
     var printTreeButton = document.getElementById('print-family-tree');
+    function loadPdfLibrary() {
+        if (window.jspdf && window.jspdf.jsPDF) { return Promise.resolve(window.jspdf.jsPDF); }
+        return new Promise(function (resolve, reject) {
+            var script = document.createElement('script');
+            script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+            script.onload = function () {
+                if (window.jspdf && window.jspdf.jsPDF) { resolve(window.jspdf.jsPDF); }
+                else { reject(new Error('The PDF library loaded but could not be initialized.')); }
+            };
+            script.onerror = function () { reject(new Error('Could not load the PDF library. Check your internet connection and try again.')); };
+            document.head.appendChild(script);
+        });
+    }
+
+    function drawPdfLine(pdf, x1, y1, x2, y2, bounds, mapX, mapY) {
+        if (y1 === y2) {
+            if (y1 < bounds.top || y1 > bounds.bottom) { return; }
+            x1 = Math.max(x1, bounds.left);
+            x2 = Math.min(x2, bounds.right);
+            if (x1 >= x2) { return; }
+        } else {
+            if (x1 < bounds.left || x1 > bounds.right) { return; }
+            y1 = Math.max(y1, bounds.top);
+            y2 = Math.min(y2, bounds.bottom);
+            if (y1 >= y2) { return; }
+        }
+        pdf.line(mapX(x1), mapY(y1), mapX(x2), mapY(y2));
+    }
+
+    function exportTreePdf(PdfConstructor) {
+        if ( ! treeLayout || ! Object.keys(treeLayout.nodes).length) {
+            throw new Error('There are no family members to export.');
+        }
+
+        var pdf = new PdfConstructor({ orientation: 'landscape', unit: 'pt', format: 'a3', compress: true });
+        var pageWidth = pdf.internal.pageSize.getWidth();
+        var pageHeight = pdf.internal.pageSize.getHeight();
+        var margin = 30;
+        var scale = 0.72;
+        var contentWidth = pageWidth - margin * 2;
+        var contentHeight = pageHeight - margin * 2;
+        var columnsPerPage = Math.max(1, Math.floor(contentWidth / (treeLayout.cellWidth * scale)) - 1);
+        var rowsPerPage = Math.max(1, Math.floor((contentHeight - 22) / (treeLayout.rowHeight * scale)));
+        var columnPages = Math.max(1, Math.ceil(Object.keys(treeLayout.nodes).reduce(function (max, id) {
+            return Math.max(max, Math.round((treeLayout.nodes[id].x - treeLayout.leftPadding) / treeLayout.cellWidth) + 1);
+        }, 0) / columnsPerPage));
+        var rowPages = Math.max(1, Math.ceil(treeLayout.maxGeneration / rowsPerPage));
+        var totalPages = columnPages * rowPages;
+        var pageNumber = 0;
+        var generationColor = [71, 85, 105];
+        var chartTitle = activeTreeTitle.replace(/\s+/g, ' ').trim();
+
+        for (var rowPage = 0; rowPage < rowPages; rowPage++) {
+            for (var columnPage = 0; columnPage < columnPages; columnPage++) {
+                if (pageNumber > 0) { pdf.addPage('a3', 'landscape'); }
+                pageNumber++;
+
+                var firstColumn = columnPage * columnsPerPage;
+                var lastColumn = firstColumn + columnsPerPage;
+                var firstGeneration = rowPage * rowsPerPage + 1;
+                var lastGeneration = Math.min(treeLayout.maxGeneration, firstGeneration + rowsPerPage - 1);
+                var left = columnPage === 0 ? 0 : treeLayout.leftPadding + firstColumn * treeLayout.cellWidth - treeLayout.cardWidth / 2;
+                var right = Math.min(treeLayout.width, treeLayout.leftPadding + lastColumn * treeLayout.cellWidth + treeLayout.cardWidth / 2);
+                var top = rowPage === 0 ? 0 : treeLayout.topPadding + (firstGeneration - 1) * treeLayout.rowHeight - treeLayout.rowHeight / 2;
+                var bottom = Math.min(treeLayout.height, treeLayout.topPadding + lastGeneration * treeLayout.rowHeight + treeLayout.rowHeight / 2);
+                var bounds = { left: left, right: right, top: top, bottom: bottom };
+                var mapX = function (x) { return margin + (x - left) * scale; };
+                var mapY = function (y) { return margin + 22 + (y - top) * scale; };
+
+                pdf.setFont('helvetica', 'bold');
+                pdf.setFontSize(13);
+                pdf.setTextColor(15, 23, 42);
+                pdf.text(chartTitle, margin, margin + 10);
+                pdf.setFont('helvetica', 'normal');
+                pdf.setFontSize(8);
+                pdf.setTextColor(100, 116, 139);
+                pdf.text('Page ' + pageNumber + ' of ' + totalPages, pageWidth - margin, margin + 10, { align: 'right' });
+
+                for (var generation = firstGeneration; generation <= lastGeneration; generation++) {
+                    var label = generation === 1 ? 'Four siblings' : (generationLabels[generation] || '');
+                    var heading = 'GENERATION ' + generation + (label ? ' · ' + label : '');
+                    var headingY = treeLayout.topPadding + (generation - 1) * treeLayout.rowHeight - 24;
+                    pdf.setFont('helvetica', 'bold');
+                    pdf.setFontSize(7);
+                    pdf.setTextColor(generationColor[0], generationColor[1], generationColor[2]);
+                    pdf.text(heading, margin, mapY(headingY));
+                }
+
+                Object.keys(treeLayout.nodes).forEach(function (id) {
+                    var node = treeLayout.nodes[id];
+                    if (! node.children.length) { return; }
+                    var branchY = node.y + treeLayout.cardHeight + (treeLayout.rowHeight - treeLayout.cardHeight) / 2;
+                    var parentX = node.x + treeLayout.cardWidth / 2;
+                    var childCenters = node.children.map(function (child) { return child.x + treeLayout.cardWidth / 2; });
+                    var color = clanColors[(node.member.clan_id - 1) % clanColors.length];
+                    var rgb = color.match(/[a-f0-9]{2}/gi).map(function (value) { return parseInt(value, 16); });
+                    pdf.setDrawColor(rgb[0], rgb[1], rgb[2]);
+                    pdf.setLineWidth(1);
+                    drawPdfLine(pdf, parentX, node.y + treeLayout.cardHeight, parentX, branchY, bounds, mapX, mapY);
+                    if (childCenters.length > 1) {
+                        drawPdfLine(pdf, Math.min.apply(Math, childCenters), branchY, Math.max.apply(Math, childCenters), branchY, bounds, mapX, mapY);
+                    }
+                    node.children.forEach(function (child) {
+                        var childX = child.x + treeLayout.cardWidth / 2;
+                        drawPdfLine(pdf, childX, branchY, childX, child.y, bounds, mapX, mapY);
+                    });
+                });
+
+                Object.keys(treeLayout.nodes).forEach(function (id) {
+                    var node = treeLayout.nodes[id];
+                    var column = Math.round((node.x - treeLayout.leftPadding) / treeLayout.cellWidth);
+                    if (column < firstColumn || column >= lastColumn
+                        || node.member.generation < firstGeneration || node.member.generation > lastGeneration
+                        || node.x < left || node.x + treeLayout.cardWidth > right
+                        || node.y < top || node.y + treeLayout.cardHeight > bottom) { return; }
+
+                    var color = clanColors[(node.member.clan_id - 1) % clanColors.length];
+                    var rgb = color.match(/[a-f0-9]{2}/gi).map(function (value) { return parseInt(value, 16); });
+                    var x = mapX(node.x);
+                    var y = mapY(node.y);
+                    var width = treeLayout.cardWidth * scale;
+                    var height = treeLayout.cardHeight * scale;
+                    pdf.setFillColor(236, 254, 255);
+                    pdf.setDrawColor(203, 213, 225);
+                    pdf.setLineWidth(0.7);
+                    pdf.roundedRect(x, y, width, height, 5, 5, 'FD');
+                    pdf.setFillColor(rgb[0], rgb[1], rgb[2]);
+                    pdf.rect(x, y, width, 3, 'F');
+                    pdf.setFont('helvetica', 'bold');
+                    pdf.setFontSize(8);
+                    pdf.setTextColor(15, 23, 42);
+                    pdf.text(pdf.splitTextToSize(node.member.name, width - 12).slice(0, 2), x + 6, y + 20);
+                    pdf.setFont('helvetica', 'normal');
+                    pdf.setFontSize(6.5);
+                    pdf.setTextColor(71, 85, 105);
+                    var stage = generationLabels[node.member.generation] || ('Generation ' + node.member.generation);
+                    pdf.text(pdf.splitTextToSize(node.member.clan_name + ' · ' + stage, width - 12).slice(0, 1), x + 6, y + 34);
+                    if (node.member.spouses.length) {
+                        pdf.setTextColor(67, 56, 202);
+                        pdf.text(pdf.splitTextToSize('Spouse: ' + node.member.spouses.join(', '), width - 12).slice(0, 1), x + 6, y + 45);
+                    }
+                });
+            }
+        }
+
+        var filename = chartTitle === 'Full family tree across all clans'
+            ? 'Full_Clan_Family_Tree'
+            : (chartTitle.replace(/[^A-Za-z0-9]+/g, '_').replace(/^_+|_+$/g, '') || 'Family_Tree');
+        pdf.save(filename + '.pdf');
+    }
+
     printTreeButton.addEventListener('click', function () {
-        var previousTitle = document.title;
-        var restorePrintState = function () {
-            document.body.classList.remove('print-full-family-tree');
-            document.title = previousTitle;
-            window.removeEventListener('afterprint', restorePrintState);
-        };
-        document.body.classList.add('print-full-family-tree');
-        document.title = 'Full_Clan_Family_Tree';
-        window.addEventListener('afterprint', restorePrintState);
-        window.print();
+        if (pdfExportInProgress) { return; }
+        pdfExportInProgress = true;
+        printTreeButton.disabled = true;
+        printTreeButton.textContent = 'Preparing PDF…';
+        loadPdfLibrary()
+            .then(exportTreePdf)
+            .catch(function (error) {
+                if (window.AppUI) { window.AppUI.notify('error', error.message); }
+                else { window.alert(error.message); }
+            })
+            .then(function () {
+                pdfExportInProgress = false;
+                printTreeButton.disabled = false;
+                printTreeButton.textContent = 'Download PDF Chart';
+            });
     });
     closeTree.addEventListener('click', hideTree);
     treeModal.addEventListener('click', function (event) {
