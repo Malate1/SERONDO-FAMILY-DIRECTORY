@@ -33,7 +33,7 @@ $asset_version = max(filemtime(FCPATH . 'assets/css/app.css'), filemtime(FCPATH 
             <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 via-emerald-500 to-rose-500 text-white shadow-md">
                 <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v6m0 0a3 3 0 100 6 3 3 0 000-6zm-6 12a3 3 0 100-6 3 3 0 000 6zm12 0a3 3 0 100-6 3 3 0 000 6zM6 15V12h12v3"/></svg>
             </span>
-            <span class="text-base font-bold leading-tight tracking-tight sm:text-lg">Clan Reunion <span class="block text-slate-400 sm:inline">Directory</span></span>
+            <span class="text-base font-bold leading-tight tracking-tight sm:text-lg">Serondo Clan <span class="block text-slate-400 sm:inline">Directory</span></span>
         </a>
 
         <details id="mobile-menu" class="mobile-menu shrink-0 lg:hidden">
