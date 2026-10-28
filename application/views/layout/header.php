@@ -7,7 +7,7 @@ $asset_version = max(filemtime(FCPATH . 'assets/css/app.css'), filemtime(FCPATH 
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <title><?= html_escape(isset($title) ? $title : 'Reunion Directory') ?> · Clan Reunion Directory</title>
+    <title><?= html_escape(isset($title) ? $title : 'Reunion Directory') ?> · Serondo Clan Directory</title>
     <link rel="icon" type="image/svg+xml" sizes="any" href="<?= base_url('assets/favicon.svg') ?>?v=<?= filemtime(FCPATH . 'assets/favicon.svg') ?>">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
