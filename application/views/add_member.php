@@ -171,7 +171,7 @@ $err_o = '<p class="mt-1.5 text-xs font-medium text-rose-600">';
                 </div>
 
                 <div class="flex flex-col-reverse gap-3 border-t border-slate-100 pt-5 sm:flex-row sm:justify-end">
-                    <a href="<?= site_url('clan_members/clan/' . $clan->id) ?>" class="touch-target rounded-xl px-5 py-2.5 text-center text-sm font-semibold text-slate-600 ring-1 ring-slate-200 transition hover:bg-slate-50">Cancel</a>
+                    <a href="<?= $member ? site_url('clan_members/member/' . $member->id) : site_url('clan_members/clan/' . $clan->id) ?>" class="touch-target rounded-xl px-5 py-2.5 text-center text-sm font-semibold text-slate-600 ring-1 ring-slate-200 transition hover:bg-slate-50">Cancel</a>
                     <button type="submit" id="form-submit" class="rounded-xl px-6 py-2.5 text-sm font-semibold text-white shadow-lg transition hover:-translate-y-0.5 active:translate-y-0 <?= $t['button'] ?>">
                         <?= $member ? 'Save changes' : 'Add member' ?>
                     </button>

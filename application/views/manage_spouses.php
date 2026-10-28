@@ -11,6 +11,8 @@ $error_open = '<p class="mt-1.5 text-xs font-medium text-rose-600">';
     <span class="mx-2">/</span>
     <a href="<?= site_url('clan_members/clan/' . $clan->id) ?>" class="font-medium transition hover:text-indigo-600"><?= html_escape($clan->clan_name) ?></a>
     <span class="mx-2">/</span>
+    <a href="<?= site_url('clan_members/member/' . $member->id) ?>" class="font-medium transition hover:text-indigo-600"><?= html_escape(member_full_name($member)) ?></a>
+    <span class="mx-2">/</span>
     <span class="font-semibold text-slate-800">Spouses</span>
 </nav>
 
@@ -64,7 +66,7 @@ $error_open = '<p class="mt-1.5 text-xs font-medium text-rose-600">';
                     </div>
                 </div>
                 <div class="flex flex-col-reverse gap-3 border-t border-slate-100 pt-5 sm:flex-row sm:justify-end">
-                    <a href="<?= site_url('clan_members/clan/' . $clan->id) ?>#m-<?= (int) $member->id ?>" class="touch-target rounded-xl px-5 py-2.5 text-center text-sm font-semibold text-slate-600 ring-1 ring-slate-200 transition hover:bg-slate-50">Back to clan</a>
+                    <a href="<?= site_url('clan_members/member/' . $member->id) ?>" class="touch-target rounded-xl px-5 py-2.5 text-center text-sm font-semibold text-slate-600 ring-1 ring-slate-200 transition hover:bg-slate-50">Back to family</a>
                     <button type="submit" class="rounded-xl px-6 py-2.5 text-sm font-semibold text-white shadow-lg transition hover:-translate-y-0.5 <?= $t['button'] ?>">Add spouse</button>
                 </div>
             </form>

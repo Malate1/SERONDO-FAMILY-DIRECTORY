@@ -1,7 +1,7 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
- * Public:   clan_members (dashboard), clan_members/clan/ID (branch grid + tree)
+ * Public:   clan_members (dashboard), clan_members/clan/ID, clan_members/member/ID
  * Rep only: clan_members/add, clan_members/edit/ID, clan_members/delete/ID (POST)
  *
  * Authorization rule: the clan is ALWAYS taken from the logged-in representative, never from
@@ -35,14 +35,13 @@ class Clan_members extends CI_Controller
      *  PUBLIC PAGES
      * ================================================================== */
 
-    /** Multi-clan dashboard: 4 summary cards, recent additions, filterable/searchable grid. */
+    /** Multi-clan dashboard: clan summaries, searchable directory, and family updates. */
     public function index()
     {
         $this->load->model('Event_model');
         $this->load->view('dashboard', [
             'title'   => 'Reunion Directory',
             'clans'   => $this->Clan_model->get_all_with_stats(),
-            'recent'  => $this->Member_model->get_recent_per_clan(3),
             'members' => $this->Member_model->get_all(),
             'spouses' => $this->Member_model->get_spouses_by_clan(NULL),
             'generation_labels' => (array) $this->config->item('generation_labels'),
@@ -66,6 +65,27 @@ class Clan_members extends CI_Controller
             'tree'       => $this->Member_model->build_tree($members),
             'spouses'    => $this->Member_model->get_spouses_by_clan($clan->id),
             'can_manage' => ($rep && (int) $rep->clan_id === (int) $clan->id),
+            'max_generation' => $this->max_generation,
+        ]);
+    }
+
+    /** A focused family page: one member and their immediate children. */
+    public function member($id = NULL)
+    {
+        $member = ctype_digit((string) $id) ? $this->Member_model->get($id) : NULL;
+        if ( ! $member)
+        {
+            show_404();
+        }
+
+        $rep = current_rep();
+        $this->load->view('member_view', [
+            'title'          => member_full_name($member),
+            'member'         => $member,
+            'clan'           => $this->_find_clan($member->clan_id),
+            'children'       => $this->Member_model->get_children($member->id),
+            'spouses'        => $this->Member_model->get_spouses($member->id),
+            'can_manage'     => ($rep && (int) $rep->clan_id === (int) $member->clan_id),
             'max_generation' => $this->max_generation,
         ]);
     }
@@ -202,7 +222,7 @@ class Clan_members extends CI_Controller
         if ($generation > $this->max_generation)
         {
             $this->session->set_flashdata('error', 'This member is already in the deepest allowed generation.');
-            redirect('clan_members/clan/' . $parent->clan_id);
+            redirect('clan_members/member/' . $parent->id);
         }
 
         $clan = $this->Clan_model->get($rep->clan_id);
@@ -301,7 +321,7 @@ class Clan_members extends CI_Controller
                 $count = count($children);
                 $this->session->set_flashdata('success', $count . ' ' . ($count === 1 ? 'child' : 'children')
                     . ' added under ' . member_full_name($parent) . '.');
-                redirect('clan_members/clan/' . $parent->clan_id);
+                redirect('clan_members/member/' . $parent->id . '#children');
             }
             elseif ( ! $errors && ! $form_error)
             {
@@ -335,7 +355,7 @@ class Clan_members extends CI_Controller
         if ($this->Member_model->has_children($member->id))
         {
             $this->session->set_flashdata('error', member_full_name($member) . ' still has children in the tree. Remove or move them first.');
-            redirect('clan_members/clan/' . $member->clan_id);
+            redirect('clan_members/member/' . $member->id);
         }
 
         if ($this->Member_model->delete($member->id))
@@ -347,7 +367,9 @@ class Clan_members extends CI_Controller
         {
             $this->session->set_flashdata('error', 'Could not delete the member. Please try again.');
         }
-        redirect('clan_members/clan/' . $member->clan_id);
+        redirect($member->parent_id !== NULL
+            ? 'clan_members/member/' . $member->parent_id . '#children'
+            : 'clan_members/clan/' . $member->clan_id);
     }
 
     /* ================================================================== *
@@ -469,7 +491,7 @@ class Clan_members extends CI_Controller
         }
 
         $this->session->set_flashdata('success', $msg);
-        redirect('clan_members/clan/' . $this->clan->id);
+        redirect('clan_members/member/' . $member_id);
     }
 
     private function _render_form($upload_error = NULL)

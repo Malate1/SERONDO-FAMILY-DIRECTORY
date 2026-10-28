@@ -4,7 +4,7 @@ $this->load->view('layout/header', ['title' => isset($title) ? $title : $clan->c
 $t     = clan_theme($clan->id);
 $total = count($members);
 
-// How many children each member has (used to disable "delete" for parents).
+// Child counts shown in the lineage tree.
 $child_count = [];
 foreach ($members as $m)
 {
@@ -14,8 +14,6 @@ foreach ($members as $m)
         $child_count[$pid] = isset($child_count[$pid]) ? $child_count[$pid] + 1 : 1;
     }
 }
-
-$btn_edit = 'touch-target rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-200';
 
 /** One lineage-tree node card. */
 $node_card = function ($n) use ($can_manage, $t, $child_count, $spouses, $max_generation) {
@@ -56,17 +54,15 @@ $node_card = function ($n) use ($can_manage, $t, $child_count, $spouses, $max_ge
     {
         $html .= '<span class="hidden rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-600 sm:inline">' . $kids . ($kids === 1 ? ' child' : ' children') . '</span>';
     }
+    $html .= '<div class="lineage-actions flex shrink-0 gap-2"><a href="' . site_url('clan_members/member/' . $n->id) . '" class="touch-target rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-200">Open family</a>';
     if ($can_manage)
     {
-        $html .= '<div class="lineage-actions flex shrink-0 gap-2">';
-        $html .= '<a href="' . site_url('clan_members/spouses/' . $n->id) . '" class="touch-target rounded-lg bg-indigo-50 px-2.5 py-1 text-xs font-semibold text-indigo-700 hover:bg-indigo-100">Spouses</a>';
         if ((int) $n->generation < (int) $max_generation)
         {
-            $html .= '<a href="' . site_url('clan_members/children/' . $n->id) . '" class="touch-target rounded-lg bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700 hover:bg-emerald-100">Children</a>';
+            $html .= '<a href="' . site_url('clan_members/children/' . $n->id) . '" class="touch-target rounded-lg bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700 hover:bg-emerald-100">+ Add children</a>';
         }
-        $html .= '<a href="' . site_url('clan_members/edit/' . $n->id) . '" class="touch-target rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-200">Edit</a></div>';
     }
-    return $html . '</div>';
+    return $html . '</div></div>';
 };
 
 /** Recursive renderer (nested <details> so branches can be collapsed). */
@@ -145,6 +141,8 @@ $render_tree = function ($nodes, $depth) use (&$render_tree, $node_card, $t) {
     </div>
 <?php else: ?>
 
+    <p class="mb-5 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-600">Open a relative's family to view their children, add to their branch, or edit their details.</p>
+
     <!-- Controls -->
     <div class="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div class="inline-flex rounded-xl bg-white p-1 shadow-sm ring-1 ring-slate-200" role="group" aria-label="View">
@@ -183,7 +181,7 @@ $render_tree = function ($nodes, $depth) use (&$render_tree, $node_card, $t) {
                          data-view="grid" data-gen="<?= (int) $m->generation ?>"
                          data-name="<?= html_escape(mb_strtolower(member_full_name($m))) ?>">
                     <?= member_avatar($m, 'h-24 w-24', 'text-3xl') ?>
-                    <h3 class="mt-4 text-base font-bold leading-tight text-slate-900"><?= html_escape(member_full_name($m)) ?></h3>
+                    <h3 class="mt-4 text-base font-bold leading-tight text-slate-900"><a href="<?= site_url('clan_members/member/' . $m->id) ?>" class="hover:underline"><?= html_escape(member_full_name($m)) ?></a></h3>
                     <?php if ($deceased): ?>
                         <p class="mt-1 text-sm text-slate-500">
                             <?= $m->birth_date ? html_escape(date('M j, Y', strtotime($m->birth_date))) : 'Birth date not set' ?>
@@ -211,27 +209,9 @@ $render_tree = function ($nodes, $depth) use (&$render_tree, $node_card, $t) {
                         </p>
                     <?php endif; ?>
 
-                    <?php if ($can_manage): ?>
-                        <div class="mt-5 flex w-full items-center gap-2 border-t border-slate-100 pt-4">
-                            <a href="<?= site_url('clan_members/spouses/' . $m->id) ?>" class="touch-target flex-1 rounded-lg bg-indigo-50 px-3 py-1.5 text-center text-xs font-semibold text-indigo-700 transition hover:bg-indigo-100">Spouses</a>
-                            <?php if ((int) $m->generation < (int) $max_generation): ?>
-                                <a href="<?= site_url('clan_members/children/' . $m->id) ?>" class="touch-target flex-1 rounded-lg bg-emerald-50 px-3 py-1.5 text-center text-xs font-semibold text-emerald-700 transition hover:bg-emerald-100">Children</a>
-                            <?php endif; ?>
-                            <a href="<?= site_url('clan_members/edit/' . $m->id) ?>" class="flex-1 <?= $btn_edit ?>">Edit</a>
-                            <?php if ($kids): ?>
-                                <span title="Remove or move this member's children first" class="cursor-not-allowed rounded-lg bg-slate-50 p-2 text-slate-300">
-                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 7h12M9 7V5a1 1 0 011-1h4a1 1 0 011 1v2m-8 0l1 12a1 1 0 001 1h6a1 1 0 001-1l1-12"/></svg>
-                                </span>
-                            <?php else: ?>
-                                <form data-confirm-title="Remove family member?" data-confirm-text="<?= html_escape(member_full_name($m) . ' and their photo will be permanently removed from the tree.') ?>" data-confirm-danger="true" data-confirm-button="Remove member" data-submit-label="Removing…" method="post" action="<?= site_url('clan_members/delete/' . $m->id) ?>" class="shrink-0">
-                                    <?= csrf_field() ?>
-                                    <button type="submit" aria-label="Delete <?= html_escape(member_full_name($m)) ?>" class="rounded-lg bg-rose-50 p-2 text-rose-600 transition hover:bg-rose-100">
-                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 7h12M9 7V5a1 1 0 011-1h4a1 1 0 011 1v2m-8 0l1 12a1 1 0 001 1h6a1 1 0 001-1l1-12"/></svg>
-                                    </button>
-                                </form>
-                            <?php endif; ?>
-                        </div>
-                    <?php endif; ?>
+                    <div class="mt-5 flex w-full flex-wrap justify-center gap-2 border-t border-slate-100 pt-4">
+                        <a href="<?= site_url('clan_members/member/' . $m->id) ?>" class="touch-target flex-1 rounded-xl px-4 py-2 text-sm font-semibold text-white <?= $t['button'] ?>">Open family &rarr;</a>
+                    </div>
                 </article>
             <?php endforeach; ?>
         </div>

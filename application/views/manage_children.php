@@ -10,7 +10,9 @@ $label = 'mb-1.5 block text-sm font-semibold text-slate-700';
     <span class="mx-2">/</span>
     <a href="<?= site_url('clan_members/clan/' . $clan->id) ?>" class="font-medium transition hover:text-indigo-600"><?= html_escape($clan->clan_name) ?></a>
     <span class="mx-2">/</span>
-    <span class="font-semibold text-slate-800">Children of <?= html_escape(member_full_name($parent)) ?></span>
+    <a href="<?= site_url('clan_members/member/' . $parent->id) ?>" class="font-medium transition hover:text-indigo-600"><?= html_escape(member_full_name($parent)) ?></a>
+    <span class="mx-2">/</span>
+    <span class="font-semibold text-slate-800" aria-current="page">Add children</span>
 </nav>
 
 <div class="mx-auto max-w-3xl overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xl shadow-slate-200/60">
@@ -26,10 +28,10 @@ $label = 'mb-1.5 block text-sm font-semibold text-slate-700';
                 <h2 class="mb-3 text-sm font-bold text-slate-900">Current children</h2>
                 <ul class="space-y-2">
                     <?php foreach ($children as $child): ?>
-                        <li class="rounded-xl border border-slate-200 px-4 py-3">
+                        <li><a href="<?= site_url('clan_members/member/' . $child->id) ?>" class="block rounded-xl border border-slate-200 px-4 py-3 transition hover:bg-slate-50">
                             <span class="font-semibold text-slate-800"><?= html_escape(member_full_name($child)) ?></span>
                             <span class="ml-2 text-xs text-slate-500"><?= html_escape(generation_label($child->generation)) ?></span>
-                        </li>
+                        </a></li>
                     <?php endforeach; ?>
                 </ul>
             </section>
@@ -103,7 +105,7 @@ $label = 'mb-1.5 block text-sm font-semibold text-slate-700';
                 </template>
 
                 <div class="flex flex-col-reverse gap-3 border-t border-slate-100 pt-5 sm:flex-row sm:justify-end">
-                    <a href="<?= site_url('clan_members/clan/' . $clan->id) ?>#m-<?= (int) $parent->id ?>" class="touch-target rounded-xl px-5 py-2.5 text-center text-sm font-semibold text-slate-600 ring-1 ring-slate-200 transition hover:bg-slate-50">Back to clan</a>
+                    <a href="<?= site_url('clan_members/member/' . $parent->id) ?>" class="touch-target rounded-xl px-5 py-2.5 text-center text-sm font-semibold text-slate-600 ring-1 ring-slate-200 transition hover:bg-slate-50">Back to parent</a>
                     <button type="submit" class="rounded-xl px-6 py-2.5 text-sm font-semibold text-white shadow-lg transition hover:-translate-y-0.5 <?= $t['button'] ?>">Save children</button>
                 </div>
             </form>
@@ -116,6 +118,13 @@ $label = 'mb-1.5 block text-sm font-semibold text-slate-700';
     var rows = document.getElementById('child-rows');
     var template = document.getElementById('child-row-template');
     var nextId = rows.querySelectorAll('.child-row').length;
+    function updateRows() {
+        var children = rows.querySelectorAll('.child-row');
+        children.forEach(function (child, index) {
+            child.querySelector('legend').textContent = 'Child ' + (index + 1);
+            child.querySelector('.remove-child-row').classList.toggle('invisible', children.length === 1);
+        });
+    }
     rows.addEventListener('click', function (event) {
         if (event.target.closest('.add-child-row')) {
             var row = template.content.cloneNode(true);
@@ -125,11 +134,13 @@ $label = 'mb-1.5 block text-sm font-semibold text-slate-700';
             });
             nextId++;
             rows.appendChild(row);
+            updateRows();
             rows.lastElementChild.querySelector('input').focus();
             return;
         }
         if (event.target.closest('.remove-child-row') && rows.querySelectorAll('.child-row').length > 1) {
             event.target.closest('.child-row').remove();
+            updateRows();
         }
     });
 })();
