@@ -41,7 +41,6 @@ $label = 'mb-1.5 block text-sm font-semibold text-slate-700';
                     <h2 class="text-sm font-bold text-slate-900">Add children</h2>
                     <p class="mt-1 text-xs text-slate-500">First and last names are required. Birth dates are optional.</p>
                 </div>
-                <button type="button" id="add-child-row" class="touch-target self-start rounded-xl bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-100 sm:self-auto">+ Add another child</button>
             </div>
 
             <?php if ($form_error): ?>
@@ -70,7 +69,8 @@ $label = 'mb-1.5 block text-sm font-semibold text-slate-700';
                                     <input id="child-birth-<?= (int) $index ?>" name="birth_date[]" type="date" value="<?= html_escape($row['birth_date']) ?>" class="<?= $input ?>">
                                     <?php if (isset($errors[$index]['birth_date'])): ?><p class="mt-1.5 text-xs font-medium text-rose-600"><?= html_escape($errors[$index]['birth_date']) ?></p><?php endif; ?>
                                 </div>
-                                <div class="flex items-end justify-end">
+                                <div class="flex items-end justify-end gap-2">
+                                    <button type="button" class="add-child-row touch-target rounded-lg bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-700 transition hover:bg-emerald-100">+ Add another</button>
                                     <button type="button" class="remove-child-row rounded-lg px-3 py-2 text-xs font-semibold text-rose-700 transition hover:bg-rose-50 <?= count($rows) === 1 ? 'invisible' : '' ?>">Remove child</button>
                                 </div>
                             </div>
@@ -94,7 +94,8 @@ $label = 'mb-1.5 block text-sm font-semibold text-slate-700';
                                 <label for="child-birth-__id__" class="<?= $label ?>">Birth date <span class="font-normal text-slate-400">(optional)</span></label>
                                 <input id="child-birth-__id__" name="birth_date[]" type="date" class="<?= $input ?>">
                             </div>
-                            <div class="flex items-end justify-end">
+                            <div class="flex items-end justify-end gap-2">
+                                <button type="button" class="add-child-row touch-target rounded-lg bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-700 transition hover:bg-emerald-100">+ Add another</button>
                                 <button type="button" class="remove-child-row rounded-lg px-3 py-2 text-xs font-semibold text-rose-700 transition hover:bg-rose-50">Remove child</button>
                             </div>
                         </div>
@@ -115,17 +116,19 @@ $label = 'mb-1.5 block text-sm font-semibold text-slate-700';
     var rows = document.getElementById('child-rows');
     var template = document.getElementById('child-row-template');
     var nextId = rows.querySelectorAll('.child-row').length;
-    document.getElementById('add-child-row').addEventListener('click', function () {
-        var row = template.content.cloneNode(true);
-        row.querySelectorAll('[id], [for]').forEach(function (element) {
-            if (element.id) { element.id = element.id.replace('__id__', nextId); }
-            if (element.htmlFor) { element.htmlFor = element.htmlFor.replace('__id__', nextId); }
-        });
-        nextId++;
-        rows.appendChild(row);
-    });
     rows.addEventListener('click', function (event) {
-        if (event.target.classList.contains('remove-child-row') && rows.querySelectorAll('.child-row').length > 1) {
+        if (event.target.closest('.add-child-row')) {
+            var row = template.content.cloneNode(true);
+            row.querySelectorAll('[id], [for]').forEach(function (element) {
+                if (element.id) { element.id = element.id.replace('__id__', nextId); }
+                if (element.htmlFor) { element.htmlFor = element.htmlFor.replace('__id__', nextId); }
+            });
+            nextId++;
+            rows.appendChild(row);
+            rows.lastElementChild.querySelector('input').focus();
+            return;
+        }
+        if (event.target.closest('.remove-child-row') && rows.querySelectorAll('.child-row').length > 1) {
             event.target.closest('.child-row').remove();
         }
     });
